@@ -157,7 +157,6 @@ configure(webModule) {
     dependencies {
         provided(servletApi)
         compile(globalModule)
-        compile('org.vaadin.addons:product-tour:0.2.2')
 
     }
 

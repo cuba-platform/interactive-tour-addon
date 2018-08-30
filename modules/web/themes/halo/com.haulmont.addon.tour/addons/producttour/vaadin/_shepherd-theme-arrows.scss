@@ -1,0 +1,215 @@
+@import '../tether/mixins/_pie-clearfix';
+@import '../tether/mixins/_inline-block';
+@import '../tether/helpers/_tether';
+@import '../tether/helpers/_tether-theme-arrows';
+@import '../shepherd/_shepherd-theme-arrows-fix';
+@import './utils';
+
+@mixin shepherd-theme-arrows($themeName: "arrows") {
+  $themePrefix: "shepherd";
+
+  // Arrows
+  $arrowSize: $v-unit-size / 2.5;
+  $arrowPointerEvents: none;
+
+  // Background colors
+  $backgroundColor: $v-panel-background-color;
+  $headerBackgroundColor: $v-background-color;
+
+  // Font colors
+  $fontColor: valo-font-color($background-color);
+  $cancelLinkColor: valo-font-color($headerBackgroundColor, 0.8);
+
+  // Borders
+  $borderRadius: $v-border-radius;
+  $border: valo-border($border: $v-panel-border, $color: darkest-color($backgroundColor, $v-app-background-color), $strength: 0.7);
+
+  // Shadows
+  $shadow: $v-shadow;
+  $useDropShadow: true;
+
+  @include shepherd-theme-arrows-fix($themePrefix: $themePrefix);
+  @include tether($themePrefix: $themePrefix);
+  @include tether-theme-arrows(
+      $themePrefix: $themePrefix,
+      $themeName: $themeName,
+      $arrowSize: $arrowSize,
+      $arrowPointerEvents: $arrowPointerEvents,
+      $backgroundColor: $backgroundColor,
+      $borderSize: getBorderSize($border),
+      $borderColor: getBorderColor($border),
+      $color: $fontColor,
+      $useDropShadow: $useDropShadow);
+
+  .#{$themePrefix}-element.#{$themePrefix}-theme-valo {
+    z-index: 20000;
+
+    // Make the arrow color the same as the header color when the arrow is on the top
+    &.#{$themePrefix}-element-attached-top.#{$themePrefix}-element-attached-center,
+    &.#{$themePrefix}-element-attached-top.#{$themePrefix}-element-attached-right.#{$themePrefix}-target-attached-bottom,
+    &.#{$themePrefix}-element-attached-top.#{$themePrefix}-element-attached-left.#{$themePrefix}-target-attached-bottom {
+      &.#{$themePrefix}-has-title .#{$themePrefix}-content:before {
+        border-bottom-color: $headerBackgroundColor;
+      }
+    }
+
+    &.#{$themePrefix}-has-title .#{$themePrefix}-content header {
+      //background: $headerBackgroundColor;
+      padding: 1em;
+      @include valo-panel-caption-style($background-color: $headerBackgroundColor);
+
+      a.shepherd-cancel-link {
+        padding: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    .#{$themePrefix}-content {
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      padding: 0;
+      @include valo-panel-style($background-color: $backgroundColor);
+      @include box-shadow(none);
+      @include filter(drop-shadow(valo-bevel-and-shadow($shadow: $shadow)));
+
+      * {
+        font-size: inherit;
+      }
+
+      header {
+        @include pie-clearfix;
+        border-radius: $borderRadius $borderRadius 0 0;
+
+        a.shepherd-cancel-link {
+          float: right;
+          text-decoration: none;
+          line-height: $v-unit-size - first-number($v-border);
+          font-weight: normal;
+          color: $cancelLinkColor;
+          opacity: 0.25;
+          position: relative;
+          padding-right: round($v-unit-size/3);
+          margin-bottom: -(round($v-unit-size/3));
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
+
+      .#{$themePrefix}-text {
+        flex: auto;
+        overflow-y: auto;
+        padding: round($v-unit-size/3);
+
+        p {
+          margin: 0 0 0.5em 0;
+          line-height: 1.3em;
+
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+
+      footer {
+        padding: 0 round($v-unit-size/3) round($v-unit-size/3);
+
+        .#{$themePrefix}-buttons {
+          text-align: right;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+
+          li {
+            display: inline;
+            padding: 0;
+            margin: 0;
+
+            .shepherd-button {
+              @include inline-block;
+
+              text-decoration: none;
+
+              @include valo-button-static-style;
+              @include valo-button-style;
+
+              $padding-width: round($v-unit-size/2);
+              padding: 0 $padding-width;
+              margin-top: $v-layout-spacing-vertical;
+              margin-left: $v-layout-spacing-horizontal;
+
+              $min-width: round($v-unit-size * 2.2);
+              min-width: $min-width;
+
+              // IE8 + border-box + min-width == fail
+              .v-ie8 & {
+                min-width: $min-width - ($padding-width * 2);
+              }
+
+              &.primary {
+                @include valo-button-style($background-color: $v-selection-color);
+                font-weight: bold;
+              }
+
+              &.friendly {
+                @include valo-button-style($background-color: $v-friendly-color);
+              }
+
+              &.danger {
+                @include valo-button-style($background-color: $v-error-indicator-color);
+              }
+
+              &.borderless {
+                @include valo-button-borderless-style;
+              }
+
+              &.borderless-colored {
+                @include valo-button-borderless-style($font-color: $v-selection-color);
+              }
+
+              &.quiet {
+                @include valo-button-quiet-style;
+              }
+
+              &.link {
+                @include valo-button-borderless-style;
+                @include valo-link-style;
+              }
+
+              &.tiny {
+                @include valo-button-style($unit-size: $v-unit-size--tiny, $bevel: null, $shadow: null, $background-color: null, $font-size: $v-font-size--tiny, $font-weight: null);
+              }
+
+              &.small {
+                @include valo-button-style($unit-size: $v-unit-size--small, $bevel: null, $shadow: null, $background-color: null, $font-size: $v-font-size--small, $font-weight: null);
+              }
+
+              &.large {
+                @include valo-button-style($unit-size: $v-unit-size--large, $bevel: null, $shadow: null, $background-color: null, $font-size: $v-font-size--large, $font-weight: null);
+              }
+
+              &.huge {
+                @include valo-button-style($unit-size: $v-unit-size--huge, $bevel: null, $shadow: null, $background-color: null, $font-size: $v-font-size--huge, $font-weight: null);
+              }
+
+              &.disabled {
+                cursor: default !important;
+                @include opacity($v-disabled-opacity);
+
+                &:after {
+                  display: none;
+                }
+              }
+            }
+
+            &:first-child .shepherd-button {
+              margin-left: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}

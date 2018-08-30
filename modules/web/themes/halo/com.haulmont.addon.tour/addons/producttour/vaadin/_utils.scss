@@ -1,0 +1,7 @@
+@function getBorderSize($border) {
+  @return first-number(flatten-list($border));
+}
+
+@function getBorderColor($border) {
+  @return first-color(flatten-list($border));
+}

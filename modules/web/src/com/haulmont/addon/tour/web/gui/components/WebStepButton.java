@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class WebStepButton extends WebAbstractExtension<org.vaadin.addons.producttour.button.StepButton> implements StepButton {
+public class WebStepButton extends
+        WebAbstractExtension<com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton> implements
+        StepButton {
 
-    protected org.vaadin.addons.producttour.button.StepButtonClickListener stepButtonClickListener;
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener stepButtonClickListener;
 
     protected Step step;
 
@@ -36,12 +38,13 @@ public class WebStepButton extends WebAbstractExtension<org.vaadin.addons.produc
      * @param caption The step button caption
      * @return The vaadin step button extension
      */
-    protected org.vaadin.addons.producttour.button.StepButton createExtension(String caption) {
-        return new org.vaadin.addons.producttour.button.StepButton(caption);
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton createExtension(
+            String caption) {
+        return new com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton(caption);
     }
 
     @Override
-    protected void initExtension(org.vaadin.addons.producttour.button.StepButton extension) {
+    protected void initExtension(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton extension) {
     }
 
     @Override
@@ -49,7 +52,8 @@ public class WebStepButton extends WebAbstractExtension<org.vaadin.addons.produc
         if (listenerList == null) {
             listenerList = new ArrayList<>();
 
-            this.stepButtonClickListener = (org.vaadin.addons.producttour.button.StepButtonClickListener) event -> {
+            this.stepButtonClickListener =
+                    (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener) event -> {
                 Component.MouseEventDetails details = new Component.MouseEventDetails();
                 details.setClientX(event.getClientX());
                 details.setClientY(event.getClientY());
@@ -88,7 +92,8 @@ public class WebStepButton extends WebAbstractExtension<org.vaadin.addons.produc
 
     @Override
     public void setStep(Step step) {
-        org.vaadin.addons.producttour.step.Step vaadinStep = step.unwrap(org.vaadin.addons.producttour.step.Step.class);
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep =
+                step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
         extension.setStep(vaadinStep);
         this.step = step;
     }

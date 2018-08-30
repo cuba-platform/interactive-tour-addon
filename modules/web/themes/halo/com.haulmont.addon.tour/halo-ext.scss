@@ -1,4 +1,5 @@
-/* Define your theme modifications inside next mixin */
-@mixin com_haulmont_addon_tour-halo-ext {
+@import "addons/producttour/product-tour";
 
+@mixin com_haulmont_addon_tour-halo-ext {
+  @include product-tour();
 }

@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.step.Step> implements Step {
+public class WebStep extends WebAbstractExtension<com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step> implements Step {
 
     protected Tour tour;
 
@@ -28,10 +28,10 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
     protected List<Consumer<HideEvent>> stepHideListeners = null;
     protected List<Consumer<ShowEvent>> stepShowListeners = null;
 
-    protected org.vaadin.addons.producttour.step.StepCancelListener stepCancelListener;
-    protected org.vaadin.addons.producttour.step.StepCompleteListener stepCompleteListener;
-    protected org.vaadin.addons.producttour.step.StepHideListener stepHideListener;
-    protected org.vaadin.addons.producttour.step.StepShowListener stepShowListener;
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCancelListener stepCancelListener;
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCompleteListener stepCompleteListener;
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepHideListener stepHideListener;
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepShowListener stepShowListener;
 
     protected Component attachedTo;
 
@@ -51,15 +51,15 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
      * @param id the step id
      * @return the vaadin step extension
      */
-    protected org.vaadin.addons.producttour.step.Step createExtension(String id) {
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step createExtension(String id) {
         if (StringUtils.isBlank(id)) {
-            return new org.vaadin.addons.producttour.step.Step();
+            return new com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step();
         }
-        return new org.vaadin.addons.producttour.step.Step(id);
+        return new com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step(id);
     }
 
     @Override
-    protected void initExtension(org.vaadin.addons.producttour.step.Step extension) {
+    protected void initExtension(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step extension) {
         extension.setSizeFull();
     }
 
@@ -70,7 +70,8 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
 
     @Override
     public void setTour(Tour tour) {
-        org.vaadin.addons.producttour.tour.Tour vaadinTour = tour.unwrap(org.vaadin.addons.producttour.tour.Tour.class);
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.Tour vaadinTour =
+                tour.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.Tour.class);
         extension.setTour(vaadinTour);
         this.tour = tour;
     }
@@ -267,7 +268,8 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
     public void addButton(StepButton button) {
         button.setStep(this);
         buttonList.add(button);
-        org.vaadin.addons.producttour.button.StepButton vaadinStepButton = button.unwrap(org.vaadin.addons.producttour.button.StepButton.class);
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton vaadinStepButton =
+                button.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton.class);
         extension.addButton(vaadinStepButton);
     }
 
@@ -275,7 +277,8 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
     public void removeButton(StepButton button) {
         button.setStep(null);
         buttonList.remove(button);
-        org.vaadin.addons.producttour.button.StepButton vaadinStepButton = button.unwrap(org.vaadin.addons.producttour.button.StepButton.class);
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton vaadinStepButton =
+                button.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton.class);
         extension.removeButton(vaadinStepButton);
     }
 
@@ -284,7 +287,7 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
         if (stepCancelListeners == null) {
             stepCancelListeners = new ArrayList<>();
 
-            this.stepCancelListener = (org.vaadin.addons.producttour.step.StepCancelListener) event -> {
+            this.stepCancelListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCancelListener) event -> {
                 CancelEvent e = new CancelEvent(WebStep.this);
                 for (Consumer<CancelEvent> stepCancelListener : stepCancelListeners) {
                     stepCancelListener.accept(e);
@@ -317,7 +320,7 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
         if (stepCompleteListeners == null) {
             stepCompleteListeners = new ArrayList<>();
 
-            this.stepCompleteListener = (org.vaadin.addons.producttour.step.StepCompleteListener) event -> {
+            this.stepCompleteListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCompleteListener) event -> {
                 CompleteEvent e = new CompleteEvent(WebStep.this);
                 for (Consumer<CompleteEvent> stepCompleteListener : stepCompleteListeners) {
                     stepCompleteListener.accept(e);
@@ -350,7 +353,7 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
         if (stepHideListeners == null) {
             stepHideListeners = new ArrayList<>();
 
-            this.stepHideListener = (org.vaadin.addons.producttour.step.StepHideListener) event -> {
+            this.stepHideListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepHideListener) event -> {
                 HideEvent e = new HideEvent(WebStep.this);
                 for (Consumer<HideEvent> stepHideListener : stepHideListeners) {
                     stepHideListener.accept(e);
@@ -383,7 +386,7 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
         if (stepShowListeners == null) {
             stepShowListeners = new ArrayList<>();
 
-            this.stepShowListener = (org.vaadin.addons.producttour.step.StepShowListener) event -> {
+            this.stepShowListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepShowListener) event -> {
                 ShowEvent e = new ShowEvent(WebStep.this);
                 for (Consumer<ShowEvent> stepShowListener : stepShowListeners) {
                     stepShowListener.accept(e);
@@ -417,18 +420,18 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
      * @param stepAnchor the cuba step anchor
      * @return the vaadin step anchor
      */
-    public org.vaadin.addons.producttour.shared.step.StepAnchor toVaadinStepAnchor(Step.StepAnchor stepAnchor) {
+    public com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.StepAnchor toVaadinStepAnchor(Step.StepAnchor stepAnchor) {
         Preconditions.checkNotNullArgument(stepAnchor);
 
         switch (stepAnchor) {
             case TOP:
-                return org.vaadin.addons.producttour.shared.step.StepAnchor.TOP;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.StepAnchor.TOP;
             case RIGHT:
-                return org.vaadin.addons.producttour.shared.step.StepAnchor.RIGHT;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.StepAnchor.RIGHT;
             case BOTTOM:
-                return org.vaadin.addons.producttour.shared.step.StepAnchor.BOTTOM;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.StepAnchor.BOTTOM;
             case LEFT:
-                return org.vaadin.addons.producttour.shared.step.StepAnchor.LEFT;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.StepAnchor.LEFT;
             default:
                 throw new IllegalArgumentException("Unknown extension anchor: " + stepAnchor);
         }
@@ -440,7 +443,7 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
      * @param stepAnchor the vaadin step anchor
      * @return the cuba step anchor
      */
-    public Step.StepAnchor fromVaadinStepAnchor(org.vaadin.addons.producttour.shared.step.StepAnchor stepAnchor) {
+    public Step.StepAnchor fromVaadinStepAnchor(com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.StepAnchor stepAnchor) {
         Preconditions.checkNotNullArgument(stepAnchor);
 
         switch (stepAnchor) {
@@ -463,16 +466,16 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
      * @param contentMode the cuba content mode
      * @return the vaadin content mode
      */
-    public org.vaadin.addons.producttour.shared.step.ContentMode toVaadinContentMode(Step.ContentMode contentMode) {
+    public com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.ContentMode toVaadinContentMode(Step.ContentMode contentMode) {
         Preconditions.checkNotNullArgument(contentMode);
 
         switch (contentMode) {
             case TEXT:
-                return org.vaadin.addons.producttour.shared.step.ContentMode.TEXT;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.ContentMode.TEXT;
             case PREFORMATTED:
-                return org.vaadin.addons.producttour.shared.step.ContentMode.PREFORMATTED;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.ContentMode.PREFORMATTED;
             case HTML:
-                return org.vaadin.addons.producttour.shared.step.ContentMode.HTML;
+                return com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.ContentMode.HTML;
             default:
                 throw new IllegalArgumentException("Unknown content mode: " + contentMode);
         }
@@ -484,7 +487,8 @@ public class WebStep extends WebAbstractExtension<org.vaadin.addons.producttour.
      * @param contentMode the vaadin content mode
      * @return the cuba content mode
      */
-    public Step.ContentMode fromVaadinContentMode(org.vaadin.addons.producttour.shared.step.ContentMode contentMode) {
+    public Step.ContentMode fromVaadinContentMode(
+            com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.ContentMode contentMode) {
         Preconditions.checkNotNullArgument(contentMode);
 
         switch (contentMode) {
