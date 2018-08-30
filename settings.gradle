@@ -1,0 +1,8 @@
+rootProject.name = 'tour-addon'
+def modulePrefix = 'tour'
+include(":${modulePrefix}-global", ":${modulePrefix}-core", ":${modulePrefix}-web", ":${modulePrefix}-web-toolkit", ":${modulePrefix}-web-themes")
+project(":${modulePrefix}-global").projectDir = new File(settingsDir, 'modules/global')
+project(":${modulePrefix}-core").projectDir = new File(settingsDir, 'modules/core')
+project(":${modulePrefix}-web").projectDir = new File(settingsDir, 'modules/web')
+project(":${modulePrefix}-web-toolkit").projectDir = new File(settingsDir, 'modules/web-toolkit')
+project(":${modulePrefix}-web-themes").projectDir = new File(settingsDir, 'modules/web/themes')

@@ -1,0 +1,10 @@
+[
+  {
+    "buttons": [
+      {
+        "caption": "Test",
+        "action": "tour:backed"
+      }
+    ]
+  }
+]
