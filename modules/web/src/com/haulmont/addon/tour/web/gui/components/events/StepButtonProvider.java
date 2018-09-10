@@ -3,7 +3,9 @@
  * Use is subject to license terms, see http://www.cuba-platform.com/commercial-software-license for details.
  */
 
-package com.haulmont.addon.tour.web.gui.components;
+package com.haulmont.addon.tour.web.gui.components.events;
+
+import com.haulmont.addon.tour.web.gui.components.StepButton;
 
 public interface StepButtonProvider {
 

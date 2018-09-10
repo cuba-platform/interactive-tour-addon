@@ -1,5 +1,7 @@
 package com.haulmont.addon.tour.web.gui.components;
 
+import com.haulmont.addon.tour.web.gui.components.events.StepProvider;
+
 import javax.annotation.Nullable;
 import java.util.Optional;
 

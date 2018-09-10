@@ -1,8 +1,16 @@
+/*
+ * Copyright (c) 2008-2018 Haulmont. All rights reserved.
+ * Use is subject to license terms, see http://www.cuba-platform.com/commercial-software-license for details.
+ */
+
 package com.haulmont.addon.tour.web.gui.components;
 
+import com.haulmont.addon.tour.web.gui.components.events.StepButtonClickEvent;
+import com.haulmont.bali.util.Preconditions;
 import com.haulmont.cuba.gui.components.Component;
 
-import java.util.EventObject;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -10,23 +18,94 @@ import java.util.function.Consumer;
  *
  * @see Step
  */
-public interface StepButton {
+public class StepButton extends
+        AbstractExtension<com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton> {
+
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener stepButtonClickListener;
+
+    protected Step step;
+
+    protected List<Consumer<StepButtonClickEvent>> listenerList = null;
 
     /**
-     * Gets client specific component instance. Can be used in client module to simplify invocation of underlying API.
+     * Constructs a new button with the given caption.
      *
-     * @param internalClass class of underlying component implementation
-     * @param <X>           type of internal class
-     * @return internal client specific component
+     * @param caption The caption of the button
      */
-    <X> X unwrap(Class<X> internalClass);
+    public StepButton(String caption) {
+        Preconditions.checkNotEmptyString(caption);
+        extension = createExtension(caption);
+    }
+
+    /**
+     * Creates an extension for a vaadin step button.
+     *
+     * @param caption The step button caption
+     * @return The vaadin step button extension
+     */
+    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton createExtension(
+            String caption) {
+        return new com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton(caption);
+    }
+
+    @Override
+    protected void initExtension(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton extension) {
+    }
+
+    /**
+     * Adds a click listener to the button.
+     *
+     * @param listener the listener to be added
+     */
+    public void addStepButtonClickListener(Consumer<StepButtonClickEvent> listener) {
+        if (listenerList == null) {
+            listenerList = new ArrayList<>();
+
+            this.stepButtonClickListener =
+                    (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener) event -> {
+                Component.MouseEventDetails details = new Component.MouseEventDetails();
+                details.setClientX(event.getClientX());
+                details.setClientY(event.getClientY());
+                details.setRelativeY(event.getRelativeY());
+                details.setRelativeX(event.getRelativeX());
+                StepButtonClickEvent e = new StepButtonClickEvent(StepButton.this, details);
+                for (Consumer<StepButtonClickEvent> clickEventConsumer : listenerList) {
+                    clickEventConsumer.accept(e);
+                }
+            };
+            extension.addClickListener(this.stepButtonClickListener);
+        }
+
+        if (!listenerList.contains(listener)) {
+            listenerList.add(listener);
+        }
+    }
+
+    /**
+     * Removes the given click listener from the button.
+     *
+     * @param listener the listener to be removed
+     */
+    public void removeStepButtonClickListener(Consumer<StepButtonClickEvent> listener) {
+        if (listenerList != null) {
+            listenerList.remove(listener);
+
+            if (listenerList.isEmpty()) {
+                listenerList = null;
+                extension.removeClickListener(this.stepButtonClickListener);
+                this.stepButtonClickListener = null;
+            }
+        }
+    }
 
     /**
      * Gets the step the button is attached to.
      *
      * @return the step
      */
-    Step getStep();
+    public Step getStep() {
+        return step;
+    }
 
     /**
      * Adds the button to the given step.
@@ -34,35 +113,48 @@ public interface StepButton {
      *
      * @param step the step the button should be added to
      */
-    void setStep(Step step);
+    public void setStep(Step step) {
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep =
+                step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
+        extension.setStep(vaadinStep);
+        this.step = step;
+    }
 
     /**
      * Gets the caption of the button.
      *
      * @return the caption of the button
      */
-    String getCaption();
+    public String getCaption() {
+        return extension.getCaption();
+    }
 
     /**
      * Sets the caption of the button.
      *
      * @param caption the caption to be set
      */
-    void setCaption(String caption);
+    public void setCaption(String caption) {
+        extension.setCaption(caption);
+    }
 
     /**
      * Gets the enabled state of the button.
      *
      * @return <code>true</code> if the button is enabled, <code>false</code> otherwise
      */
-    boolean isEnabled();
+    public boolean isEnabled() {
+        return extension.isEnabled();
+    }
 
     /**
      * Sets the enabled state of the button.
      *
      * @param enabled the enabled state to be set
      */
-    void setEnabled(boolean enabled);
+    public void setEnabled(boolean enabled) {
+        extension.setEnabled(enabled);
+    }
 
     /**
      * Adds one or more style names to this component. Multiple styles can be
@@ -70,7 +162,9 @@ public interface StepButton {
      *
      * @param style one or more style names separated by space
      */
-    void addStyleName(String style);
+    public void addStyleName(String style) {
+        extension.addStyleName(style);
+    }
 
     /**
      * Removes one or more style names from component. Multiple styles can be
@@ -78,14 +172,18 @@ public interface StepButton {
      *
      * @param style one or more style names separated by space
      */
-    void removeStyleName(String style);
+    public void removeStyleName(String style) {
+        extension.removeStyleName(style);
+    }
 
     /**
      * Styles implementation is client-type-specific.
      *
      * @return current style name
      */
-    String getStyleName();
+    public String getStyleName() {
+        return extension.getStyleName();
+    }
 
     /**
      * Sets one or more style names of the component, replacing any
@@ -96,61 +194,7 @@ public interface StepButton {
      *
      * @param style one or more style names separated by space
      */
-    void setStyleName(String style);
-
-    /**
-     * Adds a click listener to the button.
-     *
-     * @param listener the listener to be added
-     */
-    void addStepButtonClickListener(Consumer<ClickEvent> listener);
-
-    /**
-     * Removes the given click listener from the button.
-     *
-     * @param listener the listener to be removed
-     */
-    void removeStepButtonClickListener(Consumer<ClickEvent> listener);
-
-    /**
-     * Event class that contains information about a click.
-     */
-    class ClickEvent extends EventObject implements TourProvider, StepProvider, StepButtonProvider {
-        protected Component.MouseEventDetails details;
-
-        /**
-         * Constructs a new provider.
-         *
-         * @param source the source of the provider
-         */
-        public ClickEvent(StepButton source) {
-            this(source, null);
-        }
-
-        public ClickEvent(StepButton source, Component.MouseEventDetails details) {
-            super(source);
-            this.details = details;
-        }
-
-        public Component.MouseEventDetails getDetails() {
-            return details;
-        }
-
-        @Override
-        public Tour getTour() {
-            Step step = getStep();
-            return step != null ? step.getTour() : null;
-        }
-
-        @Override
-        public Step getStep() {
-            StepButton button = getStepButton();
-            return button != null ? button.getStep() : null;
-        }
-
-        @Override
-        public StepButton getStepButton() {
-            return (StepButton) getSource();
-        }
+    public void setStyleName(String style) {
+        extension.setStyleName(style);
     }
 }

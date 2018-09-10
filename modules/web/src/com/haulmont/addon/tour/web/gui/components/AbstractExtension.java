@@ -5,18 +5,23 @@
 
 package com.haulmont.addon.tour.web.gui.components;
 
-import com.vaadin.server.AbstractExtension;
-
 /**
  * Base class for web extensions.
  */
-public abstract class WebAbstractExtension<T extends AbstractExtension> {
+public abstract class AbstractExtension<T extends com.vaadin.server.AbstractExtension> {
 
-    public WebAbstractExtension() {
+    public AbstractExtension() {
     }
 
     protected T extension;
 
+    /**
+     * Gets client specific component instance. Can be used in client module to simplify invocation of underlying API.
+     *
+     * @param internalClass class of underlying component implementation
+     * @param <X>           type of internal class
+     * @return internal client specific component
+     */
     public <X> X unwrap(Class<X> internalClass) {
         return internalClass.cast(getExtension());
     }
