@@ -199,118 +199,174 @@ For each button we describe its attributes and the action performed on the butto
 ]
 ```
 
-`ProductBrowse.java`:
+To start the tour let's create a method `startTour()` to create an action which will start the tour. We'll disable the setting 
+of starting a tour only one on the first screen opening. This method will be invoked on the `tourButton` click. Additionally,
+ let's call this method at the screen initialization. 
+
+`ProductBrowse.java` should look like this:
 ```Java
-@Inject
-protected Resources resources;
+package com.company.touraddondemo.web.product;
 
-@Inject
-protected TourParser tourParser;
+import com.haulmont.addon.tour.web.gui.components.Tour;
+import com.haulmont.addon.tour.web.gui.components.TourStartAction;
+import com.haulmont.addon.tour.web.gui.utils.TourParser;
+import com.haulmont.cuba.core.global.Resources;
+import com.haulmont.cuba.gui.components.AbstractLookup;
 
-protected Tour tour;
+import javax.inject.Inject;
+import java.util.Map;
 
-@Override
-public void init(Map<String, Object> params) {
-    super.init(params);
+public class ProductBrowse extends AbstractLookup {
 
-    createTour();
-}
+    @Inject
+    protected Resources resources;
 
-protected void createTour() {
-    String sourceFolder = "com/company/touraddondemo/web/product/";
-    String file = resources.getResourceAsString(sourceFolder + "productBrowseTour.json");
-    tour = tourParser.parseTour(file, getMessagesPack(), this);
+    @Inject
+    protected TourParser tourParser;
+
+    protected Tour tour;
+
+   @Override
+   public void init(Map<String, Object> params) { 
+       super.init(params);
+   
+       createTour(); // Create a tour
+   
+       startTour(); // Start the tour
+   }
+   
+   protected void createTour() {
+       // The path to your source folder
+       String sourceFolder = "com/company/touraddondemo/web/product/";
+       // Your JSON file
+       String file = resources.getResourceAsString(sourceFolder + "productBrowseTour.json");
+       // Parse your tour from your JSON using given messages pack and extending this window
+       tour = tourParser.parseTour(file, getMessagesPack(), this); 
+   }
+   
+   public void startTour() {
+       // Create an action to start the tour
+       TourStartAction tourStartAction = TourStartAction.create(tour);
+       // Set that tour will start every time
+       tourStartAction.setSettingsEnabled(false);
+       // Perform the start action by this window
+       tourStartAction.actionPerform(this); 
+   }
 }
 ```
 
-Next, let's create a method to create an action which will start the tour. We'll disable the setting of starting a tour only one on the first screen opening.
+At the `ProductEdit` screen in the `postInit()` method we will call the `createTour()` method where we create a tour instance, 
+add the steps, their parameters, and buttons. Also, in the `postInit()` method we create an action that will start a tour 
+without disabling additional settings.
 
+`ProductEdit.java` should look like this:
 ```Java
-public void startTour() {
-    TourStartAction tourStartAction = TourStartAction.create(tour);
-    tourStartAction.setSettingsEnabled(false);
-    tourStartAction.actionPerform(this);
+package com.company.touraddondemo.web.product;
+
+import com.company.touraddondemo.entity.Product;
+import com.haulmont.addon.tour.web.gui.components.*;
+import com.haulmont.cuba.gui.ComponentsHelper;
+import com.haulmont.cuba.gui.components.AbstractEditor;
+
+import java.util.Objects;
+
+public class ProductEdit extends AbstractEditor<Product> {
+
+    protected Tour tour;
+
+    @Override
+    protected void postInit() {
+        super.postInit();
+
+        // Create a tour
+        createTour(); 
+        
+        // Create an action to start the tour
+        TourStartAction tourStartAction = TourStartAction.create(tour);
+        // Perform the start action by this window
+        tourStartAction.actionPerform(this); 
+    }
+        
+    // Creates the tour by JAVA classes
+    protected void createTour() {
+        // Create a tour extending this window
+        tour = new Tour(this); 
+        
+        // Create a step with your own id, might be null
+        Step step = new Step("step1"); 
+        step.setText(getMessage("tour.editStartedText"));
+        step.setTitle(getMessage("tour.editStartedTitle"));
+        step.setWidth("400");
+        step.setTextContentMode(ContentMode.HTML);
+        step.setTitleContentMode(ContentMode.HTML);
+        step.setCancellable(true);
+        
+        // Create a step button with your own caption
+        StepButton stepButton = new StepButton(getMessage("tour.cancel")); 
+        // You could set your own style to the step button
+        stepButton.setStyleName("danger"); 
+        stepButton.setEnabled(true);
+        // You could use predefined actions from TourActionType and StepActionType or create 
+        // your own StepButtonClickListener
+        stepButton.addStepButtonClickListener(TourActionType.CANCEL::execute); 
+        step.addButton(stepButton);
+
+        stepButton = new StepButton(getMessage("tour.next"));
+        stepButton.setStyleName("friendly");
+        stepButton.setEnabled(true);
+        stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
+        step.addButton(stepButton);
+
+        tour.addStep(step);
+
+        step = new Step("step2");
+        step.setText(getMessage("tour.fieldGroupText"));
+        step.setTitle(getMessage("tour.fieldGroupTitle"));
+        step.setWidth("400");
+        step.setTextContentMode(ContentMode.HTML);
+        step.setTitleContentMode(ContentMode.HTML);
+        step.setAttachedTo(Objects.requireNonNull(ComponentsHelper.findComponent(getFrame(), "fieldGroup")));
+        step.setAnchor(StepAnchor.RIGHT);
+
+        stepButton = new StepButton(getMessage("tour.back"));
+        stepButton.setStyleName("primary");
+        stepButton.setEnabled(true);
+        stepButton.addStepButtonClickListener(TourActionType.BACK::execute);
+        step.addButton(stepButton);
+
+        stepButton = new StepButton(getMessage("tour.next"));
+        stepButton.setStyleName("friendly");
+        stepButton.setEnabled(true);
+        stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
+        step.addButton(stepButton);
+
+        tour.addStep(step);
+
+        step = new Step("step3");
+        step.setText(getMessage("tour.windowActionsText"));
+        step.setTitle(getMessage("tour.windowActionsTitle"));
+        step.setWidth("400");
+        step.setTextContentMode(ContentMode.HTML);
+        step.setTitleContentMode(ContentMode.HTML);
+        step.setAttachedTo(Objects.requireNonNull(ComponentsHelper.findComponent(getFrame(), "windowClose")));
+        step.setAnchor(StepAnchor.RIGHT);
+
+        stepButton = new StepButton(getMessage("tour.back"));
+        stepButton.setStyleName("primary");
+        stepButton.setEnabled(true);
+        stepButton.addStepButtonClickListener(TourActionType.BACK::execute);
+        step.addButton(stepButton);
+
+        stepButton = new StepButton(getMessage("tour.finish"));
+        stepButton.setStyleName("friendly");
+        stepButton.setEnabled(true);
+        stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
+        step.addButton(stepButton);
+
+        tour.addStep(step);
+    }
 }
 ```
-
-This method will be invoked on the `tourButton` click. Additionally, let's call this method at the screen initialization. 
-
-At the `ProductEdit` initialization we will call the `createTour()` method where we create a tour instance, add the steps, their parameters, and buttons:
-
-```Java
-protected void createTour() {
-    tour = new WebTour(this);
-
-    Step step = new WebStep("step1");
-    step.setText(getMessage("tour.editStartedText"));
-    step.setTitle(getMessage("tour.editStartedTitle"));
-    step.setWidth("400");
-    step.setTextContentMode(Step.ContentMode.HTML);
-    step.setTitleContentMode(Step.ContentMode.HTML);
-    step.setCancellable(true);
-
-    StepButton stepButton = new WebStepButton(getMessage("tour.cancel"));
-    stepButton.setStyleName("danger");
-    stepButton.setEnabled(true);
-    stepButton.addStepButtonClickListener(TourActionType.CANCEL::execute);
-    step.addButton(stepButton);
-
-    stepButton = new WebStepButton(getMessage("tour.next"));
-    stepButton.setStyleName("friendly");
-    stepButton.setEnabled(true);
-    stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
-    step.addButton(stepButton);
-
-    tour.addStep(step);
-
-    step = new WebStep("step2");
-    step.setText(getMessage("tour.fieldGroupText"));
-    step.setTitle(getMessage("tour.fieldGroupTitle"));
-    step.setWidth("400");
-    step.setTextContentMode(Step.ContentMode.HTML);
-    step.setTitleContentMode(Step.ContentMode.HTML);
-    step.setAttachedTo(ComponentsHelper.findComponent(getFrame(), "fieldGroup"));
-    step.setAnchor(Step.StepAnchor.RIGHT);
-
-    stepButton = new WebStepButton(getMessage("tour.back"));
-    stepButton.setStyleName("primary");
-    stepButton.setEnabled(true);
-    stepButton.addStepButtonClickListener(TourActionType.BACK::execute);
-    step.addButton(stepButton);
-
-    stepButton = new WebStepButton(getMessage("tour.next"));
-    stepButton.setStyleName("friendly");
-    stepButton.setEnabled(true);
-    stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
-    step.addButton(stepButton);
-
-    tour.addStep(step);
-
-    step = new WebStep("step3");
-    step.setText(getMessage("tour.windowActionsText"));
-    step.setTitle(getMessage("tour.windowActionsTitle"));
-    step.setWidth("400");
-    step.setTextContentMode(Step.ContentMode.HTML);
-    step.setTitleContentMode(Step.ContentMode.HTML);
-    step.setAttachedTo(ComponentsHelper.findComponent(getFrame(), "windowClose"));
-    step.setAnchor(Step.StepAnchor.RIGHT);
-
-    stepButton = new WebStepButton(getMessage("tour.back"));
-    stepButton.setStyleName("primary");
-    stepButton.setEnabled(true);
-    stepButton.addStepButtonClickListener(TourActionType.BACK::execute);
-    step.addButton(stepButton);
-
-    stepButton = new WebStepButton(getMessage("tour.finish"));
-    stepButton.setStyleName("friendly");
-    stepButton.setEnabled(true);
-    stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
-    step.addButton(stepButton);
-
-    tour.addStep(step);
-}
-```
-Also, in the `init()` method we create an action that will start a tour without disabling additional settings.
 
 In order to display localized messages, put them in `messages.properties`:
 
