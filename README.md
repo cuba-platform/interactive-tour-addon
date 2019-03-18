@@ -15,12 +15,12 @@ Select a version of the add-on which is compatible with the platform version use
 
 | Platform Version| Add-on Version|
 |:----------------|:--------------|
-| 6.10.8           | 1.0.0         |
+| 6.10.8           | 1.0.2         |
 
 
 Add custom application component to your project (change the version part if needed):
 ```
-com.haulmont.addon.tour:tour-global:1.0.0   
+com.haulmont.addon.tour:tour-global:1.0.2   
 ```
 
 ### Description
@@ -37,7 +37,7 @@ To start a tour, call the `TourStartAction`. The `setSettingsEnabled()` method a
 To use this add-on in a CUBA Studio project, in the project properties add add-on like custom application component and
 save settings.
 ```
-com.haulmont.addon.tour:tour-global:1.0.0   
+com.haulmont.addon.tour:tour-global:1.0.2   
 ```
 
 #### Sample task
