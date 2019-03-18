@@ -1,64 +1,37 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <app-component xmlns="http://schemas.haulmont.com/cuba/app-component.xsd"
                dependsOn="com.haulmont.cuba">
-    <module blocks="*"
-            name="global">
-        <artifact appJar="true"
-                  name="tour-global"/>
-        <property name="cuba.persistenceConfig"
-                  value="+com/haulmont/addon/tour/persistence.xml"/>
-        <property name="cuba.metadataConfig"
-                  value="+com/haulmont/addon/tour/metadata.xml"/>
-        <property name="cuba.viewsConfig"
-                  value="+com/haulmont/addon/tour/views.xml"/>
+
+    <module name="global" blocks="*">
+        <artifact name="tour-global" appJar="true"/>
+
+        <property name="cuba.persistenceConfig" value="+com/haulmont/addon/tour/persistence.xml"/>
+        <property name="cuba.metadataConfig" value="+com/haulmont/addon/tour/metadata.xml"/>
+        <property name="cuba.viewsConfig" value="+com/haulmont/addon/tour/views.xml"/>
     </module>
-    <module blocks="core"
-            dependsOn="global"
-            name="core">
-        <artifact appJar="true"
-                  name="tour-core"/>
-        <property name="cuba.springContextConfig"
-                  value="+com/haulmont/addon/tour/spring.xml"/>
-        <property name="cuba.mainMessagePack"
-                  value="+com.haulmont.addon.tour.core"/>
-        <artifact classifier="db"
-                  configuration="dbscripts"
-                  ext="zip"
-                  name="tour-core"/>
+    <module name="core" dependsOn="global" blocks="core">
+        <artifact name="tour-core" appJar="true"/>
+        <artifact name="tour-core" classifier="db" ext="zip" configuration="dbscripts"/>
+
+        <property name="cuba.springContextConfig" value="+com/haulmont/addon/tour/spring.xml"/>
+        <property name="cuba.mainMessagePack" value="+com.haulmont.addon.tour.core"/>
     </module>
-    <module blocks="web"
-            dependsOn="global"
-            name="web">
-        <artifact appJar="true"
-                  name="tour-web"/>
-        <artifact classifier="web"
-                  configuration="webcontent"
-                  ext="zip"
-                  name="tour-web"/>
-        <artifact classifier="web"
-                  configuration="webcontent"
-                  ext="zip"
-                  name="tour-web-toolkit"
+    <module name="web" dependsOn="global" blocks="web">
+        <artifact name="tour-web" appJar="true"/>
+        <artifact name="tour-web" classifier="web" ext="zip" configuration="webcontent"/>
+        <artifact name="tour-web-toolkit" classifier="web" ext="zip" configuration="webcontent"
                   skipIfExists="web-toolkit"/>
-        <artifact configuration="themes"
-                  name="tour-web-themes"/>
-        <property name="cuba.springContextConfig"
-                  value="+com/haulmont/addon/tour/web-spring.xml"/>
-        <property name="cuba.dispatcherSpringContextConfig"
-                  value="+com/haulmont/addon/tour/web-dispatcher-spring.xml"/>
-        <property name="cuba.windowConfig"
-                  value="+com/haulmont/addon/tour/web-screens.xml"/>
-        <property name="cuba.menuConfig"
-                  value="+com/haulmont/addon/tour/web-menu.xml"/>
-        <property name="cuba.permissionConfig"
-                  value="+com/haulmont/addon/tour/web-permissions.xml"/>
-        <property name="cuba.mainMessagePack"
-                  value="+com.haulmont.addon.tour.web"/>
-        <property name="cuba.web.widgetSet"
-                  value="com.haulmont.addon.tour.web.toolkit.ui.AppWidgetSet"/>
+        <artifact name="tour-web-themes" configuration="themes"/>
+
+        <property name="cuba.springContextConfig" value="+com/haulmont/addon/tour/web-spring.xml"/>
+        <property name="cuba.dispatcherSpringContextConfig" value="+com/haulmont/addon/tour/web-dispatcher-spring.xml"/>
+        <property name="cuba.windowConfig" value="+com/haulmont/addon/tour/web-screens.xml"/>
+        <property name="cuba.menuConfig" value="+com/haulmont/addon/tour/web-menu.xml"/>
+        <property name="cuba.permissionConfig" value="+com/haulmont/addon/tour/web-permissions.xml"/>
+        <property name="cuba.mainMessagePack" value="+com.haulmont.addon.tour.web"/>
+        <property name="cuba.web.widgetSet" value="com.haulmont.addon.tour.web.toolkit.ui.AppWidgetSet"/>
     </module>
-    <module dependsOn="web"
-            name="web-toolkit">
+    <module name="web-toolkit" dependsOn="web">
         <artifact name="tour-web-toolkit"/>
     </module>
     <module name="web-themes">

@@ -15,7 +15,7 @@ Select a version of the add-on which is compatible with the platform version use
 
 | Platform Version| Add-on Version|
 |:----------------|:--------------|
-| 6.9.x           | 1.0.0         |
+| 6.10.8           | 1.0.0         |
 
 
 Add custom application component to your project (change the version part if needed):
