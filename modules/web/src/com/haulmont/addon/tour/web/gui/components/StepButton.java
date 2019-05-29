@@ -6,11 +6,12 @@
 package com.haulmont.addon.tour.web.gui.components;
 
 import com.haulmont.addon.tour.web.gui.components.events.StepButtonClickEvent;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.bali.util.Preconditions;
-import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.MouseEventDetails;
+import com.vaadin.shared.Registration;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -21,11 +22,9 @@ import java.util.function.Consumer;
 public class StepButton extends
         AbstractExtension<com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton> {
 
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener stepButtonClickListener;
+    protected Registration stepButtonClickListener;
 
     protected Step step;
-
-    protected List<Consumer<StepButtonClickEvent>> listenerList = null;
 
     /**
      * Constructs a new button with the given caption.
@@ -57,28 +56,21 @@ public class StepButton extends
      *
      * @param listener the listener to be added
      */
-    public void addStepButtonClickListener(Consumer<StepButtonClickEvent> listener) {
-        if (listenerList == null) {
-            listenerList = new ArrayList<>();
-
-            this.stepButtonClickListener =
-                    (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButtonClickListener) event -> {
-                Component.MouseEventDetails details = new Component.MouseEventDetails();
-                details.setClientX(event.getClientX());
-                details.setClientY(event.getClientY());
-                details.setRelativeY(event.getRelativeY());
-                details.setRelativeX(event.getRelativeX());
-                StepButtonClickEvent e = new StepButtonClickEvent(StepButton.this, details);
-                for (Consumer<StepButtonClickEvent> clickEventConsumer : listenerList) {
-                    clickEventConsumer.accept(e);
-                }
-            };
-            extension.addClickListener(this.stepButtonClickListener);
+    public Subscription addStepButtonClickListener(Consumer<StepButtonClickEvent> listener) {
+        if (stepButtonClickListener == null) {
+            stepButtonClickListener = extension.addClickListener(this::onStepButtonClick);
         }
+        return getEventHub().subscribe(StepButtonClickEvent.class, listener);
+    }
 
-        if (!listenerList.contains(listener)) {
-            listenerList.add(listener);
-        }
+    protected void onStepButtonClick(StepButtonClickListener.ClickEvent event) {
+        MouseEventDetails details = new MouseEventDetails();
+        details.setClientX(event.getClientX());
+        details.setClientY(event.getClientY());
+        details.setRelativeY(event.getRelativeY());
+        details.setRelativeX(event.getRelativeX());
+        StepButtonClickEvent e = new StepButtonClickEvent(StepButton.this, details);
+        publish(StepButtonClickEvent.class, e);
     }
 
     /**
@@ -86,16 +78,8 @@ public class StepButton extends
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeStepButtonClickListener(Consumer<StepButtonClickEvent> listener) {
-        if (listenerList != null) {
-            listenerList.remove(listener);
-
-            if (listenerList.isEmpty()) {
-                listenerList = null;
-                extension.removeClickListener(this.stepButtonClickListener);
-                this.stepButtonClickListener = null;
-            }
-        }
     }
 
     /**
@@ -114,9 +98,6 @@ public class StepButton extends
      * @param step the step the button should be added to
      */
     public void setStep(Step step) {
-        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep =
-                step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
-        extension.setStep(vaadinStep);
         this.step = step;
     }
 

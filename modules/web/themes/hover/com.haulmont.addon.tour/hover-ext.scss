@@ -1,0 +1,5 @@
+@import "addons/producttour/product-tour";
+
+@mixin com_haulmont_addon_tour-hover-ext {
+  @include product-tour();
+}

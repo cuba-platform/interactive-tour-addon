@@ -6,6 +6,6 @@
 .halo {
   // include auto-generated app components SCSS
   @include app_components;
-  
+
   @include com_haulmont_addon_tour-halo-ext;
 }

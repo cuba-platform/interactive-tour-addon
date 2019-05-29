@@ -1,0 +1,5 @@
+@import "hover-ext";
+
+@mixin com_haulmont_addon_tour {
+  @include com_haulmont_addon_tour-hover-ext;
+}

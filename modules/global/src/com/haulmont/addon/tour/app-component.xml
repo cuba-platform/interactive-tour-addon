@@ -11,7 +11,6 @@
     </module>
     <module name="core" dependsOn="global" blocks="core">
         <artifact name="tour-core" appJar="true"/>
-        <artifact name="tour-core" classifier="db" ext="zip" configuration="dbscripts"/>
 
         <property name="cuba.springContextConfig" value="+com/haulmont/addon/tour/spring.xml"/>
         <property name="cuba.mainMessagePack" value="+com.haulmont.addon.tour.core"/>
@@ -19,9 +18,9 @@
     <module name="web" dependsOn="global" blocks="web">
         <artifact name="tour-web" appJar="true"/>
         <artifact name="tour-web" classifier="web" ext="zip" configuration="webcontent"/>
-        <artifact name="tour-web-toolkit" classifier="web" ext="zip" configuration="webcontent"
+        <artifact name="tour-web-toolkit" appJar="true" classifier="client" ext="jar"
                   skipIfExists="web-toolkit"/>
-        <artifact name="tour-web-themes" configuration="themes"/>
+        <artifact name="tour-web" ext="jar" configuration="themes"/>
 
         <property name="cuba.springContextConfig" value="+com/haulmont/addon/tour/web-spring.xml"/>
         <property name="cuba.dispatcherSpringContextConfig" value="+com/haulmont/addon/tour/web-dispatcher-spring.xml"/>
@@ -33,8 +32,5 @@
     </module>
     <module name="web-toolkit" dependsOn="web">
         <artifact name="tour-web-toolkit"/>
-    </module>
-    <module name="web-themes">
-        <artifact name="tour-web-themes"/>
     </module>
 </app-component>

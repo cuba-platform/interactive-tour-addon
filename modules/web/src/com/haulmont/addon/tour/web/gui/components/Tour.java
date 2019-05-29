@@ -1,8 +1,11 @@
 package com.haulmont.addon.tour.web.gui.components;
 
 import com.haulmont.addon.tour.web.gui.components.events.*;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.*;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.cuba.gui.components.Component;
 import com.vaadin.server.AbstractClientConnector;
+import com.vaadin.shared.Registration;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -20,17 +23,11 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
 
     protected List<Step> stepList = new ArrayList<>();
 
-    protected List<Consumer<TourShowEvent>> tourShowListeners = null;
-    protected List<Consumer<TourCancelEvent>> tourCancelListeners = null;
-    protected List<Consumer<TourCompleteEvent>> tourCompleteListeners = null;
-    protected List<Consumer<TourStartEvent>> tourStartListeners = null;
-    protected List<Consumer<TourHideEvent>> tourHideListeners = null;
-
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourShowListener tourShowListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourCancelListener tourCancelListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourCompleteListener tourCompleteListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourStartListener tourStartListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourHideListener tourHideListener;
+    protected Registration tourShowListener;
+    protected Registration tourCancelListener;
+    protected Registration tourCompleteListener;
+    protected Registration tourStartListener;
+    protected Registration tourHideListener;
 
     /**
      * An extension of vaadin tour allowing to extend the component of our choice and not just the main UI component.
@@ -219,25 +216,18 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addShowListener(Consumer<TourShowEvent> listener) {
-        if (tourShowListeners == null) {
-            tourShowListeners = new ArrayList<>();
-
-            this.tourShowListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourShowListener) event -> {
-                com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step currentStep = event.getCurrentStep();
-                com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step previousStep = event.getPreviousStep();
-                TourShowEvent e = new TourShowEvent(Tour.this, getStepByVaadinStep(previousStep), getStepByVaadinStep(currentStep));
-                for (Consumer<TourShowEvent> tourShowListener : tourShowListeners) {
-                    tourShowListener.accept(e);
-                }
-            };
-
-            extension.addShowListener(this.tourShowListener);
-
+    public Subscription addShowListener(Consumer<TourShowEvent> listener) {
+        if (tourShowListener == null) {
+            tourShowListener = extension.addShowListener(this::onTourShow);
         }
-        if (!tourShowListeners.contains(listener)) {
-            tourShowListeners.add(listener);
-        }
+        return getEventHub().subscribe(TourShowEvent.class, listener);
+    }
+
+    protected void onTourShow(TourShowListener.ShowEvent event) {
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step currentStep = event.getCurrentStep();
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step previousStep = event.getPreviousStep();
+        TourShowEvent e = new TourShowEvent(Tour.this, getStepByVaadinStep(previousStep), getStepByVaadinStep(currentStep));
+        publish(TourShowEvent.class, e);
     }
 
     /**
@@ -245,16 +235,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeShowListener(Consumer<TourShowEvent> listener) {
-        if (tourShowListeners != null) {
-            tourShowListeners.remove(listener);
-
-            if (tourShowListeners.isEmpty()) {
-                tourShowListeners = null;
-                extension.removeShowListener(this.tourShowListener);
-                this.tourShowListener = null;
-            }
-        }
     }
 
     /**
@@ -262,23 +244,16 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addCancelListener(Consumer<TourCancelEvent> listener) {
-        if (tourCancelListeners == null) {
-            tourCancelListeners = new ArrayList<>();
-
-            this.tourCancelListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourCancelListener) event -> {
-                TourCancelEvent e = new TourCancelEvent(Tour.this);
-                for (Consumer<TourCancelEvent> tourCancelListener : tourCancelListeners) {
-                    tourCancelListener.accept(e);
-                }
-            };
-
-            extension.addCancelListener(this.tourCancelListener);
-
+    public Subscription addCancelListener(Consumer<TourCancelEvent> listener) {
+        if (tourCancelListener == null) {
+            tourCancelListener = extension.addCancelListener(this::onTourCancel);
         }
-        if (!tourCancelListeners.contains(listener)) {
-            tourCancelListeners.add(listener);
-        }
+        return getEventHub().subscribe(TourCancelEvent.class, listener);
+    }
+
+    protected void onTourCancel(TourCancelListener.CancelEvent event) {
+        TourCancelEvent e = new TourCancelEvent(Tour.this);
+        publish(TourCancelEvent.class, e);
     }
 
     /**
@@ -286,16 +261,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeCancelListener(Consumer<TourCancelEvent> listener) {
-        if (tourCancelListeners != null) {
-            tourCancelListeners.remove(listener);
-
-            if (tourCancelListeners.isEmpty()) {
-                tourCancelListeners = null;
-                extension.removeCancelListener(this.tourCancelListener);
-                this.tourCancelListener = null;
-            }
-        }
     }
 
     /**
@@ -303,23 +270,16 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addCompleteListener(Consumer<TourCompleteEvent> listener) {
-        if (tourCompleteListeners == null) {
-            tourCompleteListeners = new ArrayList<>();
-
-            this.tourCompleteListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourCompleteListener) event -> {
-                TourCompleteEvent e = new TourCompleteEvent(Tour.this);
-                for (Consumer<TourCompleteEvent> tourCompleteListener : tourCompleteListeners) {
-                    tourCompleteListener.accept(e);
-                }
-            };
-
-            extension.addCompleteListener(this.tourCompleteListener);
-
+    public Subscription addCompleteListener(Consumer<TourCompleteEvent> listener) {
+        if (tourCompleteListener == null) {
+            tourCompleteListener = extension.addCompleteListener(this::onTourComplete);
         }
-        if (!tourCompleteListeners.contains(listener)) {
-            tourCompleteListeners.add(listener);
-        }
+        return getEventHub().subscribe(TourCompleteEvent.class, listener);
+    }
+
+    protected void onTourComplete(TourCompleteListener.CompleteEvent event) {
+        TourCompleteEvent e = new TourCompleteEvent(Tour.this);
+        publish(TourCompleteEvent.class, e);
     }
 
     /**
@@ -327,16 +287,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeCompleteListener(Consumer<TourCompleteEvent> listener) {
-        if (tourCompleteListeners != null) {
-            tourCompleteListeners.remove(listener);
-
-            if (tourCompleteListeners.isEmpty()) {
-                tourCompleteListeners = null;
-                extension.removeCompleteListener(this.tourCompleteListener);
-                this.tourCompleteListener = null;
-            }
-        }
     }
 
     /**
@@ -344,23 +296,16 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addHideListener(Consumer<TourHideEvent> listener) {
-        if (tourHideListeners == null) {
-            tourHideListeners = new ArrayList<>();
-
-            this.tourHideListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourHideListener) event -> {
-                TourHideEvent e = new TourHideEvent(Tour.this);
-                for (Consumer<TourHideEvent> tourHideListener : tourHideListeners) {
-                    tourHideListener.accept(e);
-                }
-            };
-
-            extension.addHideListener(this.tourHideListener);
-
+    public Subscription addHideListener(Consumer<TourHideEvent> listener) {
+        if (tourHideListener == null) {
+            tourHideListener = extension.addHideListener(this::onTourHide);
         }
-        if (!tourHideListeners.contains(listener)) {
-            tourHideListeners.add(listener);
-        }
+        return getEventHub().subscribe(TourHideEvent.class, listener);
+    }
+
+    protected void onTourHide(TourHideListener.HideEvent event) {
+        TourHideEvent e = new TourHideEvent(Tour.this);
+        publish(TourHideEvent.class, e);
     }
 
     /**
@@ -368,16 +313,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeHideListener(Consumer<TourHideEvent> listener) {
-        if (tourHideListeners != null) {
-            tourHideListeners.remove(listener);
-
-            if (tourHideListeners.isEmpty()) {
-                tourHideListeners = null;
-                extension.removeHideListener(this.tourHideListener);
-                this.tourHideListener = null;
-            }
-        }
     }
 
     /**
@@ -385,23 +322,16 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addStartListener(Consumer<TourStartEvent> listener) {
-        if (tourStartListeners == null) {
-            tourStartListeners = new ArrayList<>();
-
-            this.tourStartListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.TourStartListener) event -> {
-                TourStartEvent e = new TourStartEvent(Tour.this);
-                for (Consumer<TourStartEvent> tourStartListener : tourStartListeners) {
-                    tourStartListener.accept(e);
-                }
-            };
-
-            extension.addStartListener(this.tourStartListener);
-
+    public Subscription addStartListener(Consumer<TourStartEvent> listener) {
+        if (tourStartListener == null) {
+            tourStartListener = extension.addStartListener(this::onTourStart);
         }
-        if (!tourStartListeners.contains(listener)) {
-            tourStartListeners.add(listener);
-        }
+        return getEventHub().subscribe(TourStartEvent.class, listener);
+    }
+
+    protected void onTourStart(TourStartListener.StartEvent event) {
+        TourStartEvent e = new TourStartEvent(Tour.this);
+        publish(TourStartEvent.class, e);
     }
 
     /**
@@ -409,15 +339,7 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeStartListener(Consumer<TourStartEvent> listener) {
-        if (tourStartListeners != null) {
-            tourStartListeners.remove(listener);
-
-            if (tourStartListeners.isEmpty()) {
-                tourStartListeners = null;
-                extension.removeStartListener(this.tourStartListener);
-                this.tourStartListener = null;
-            }
-        }
     }
 }

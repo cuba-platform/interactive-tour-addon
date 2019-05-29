@@ -1,8 +1,7 @@
 
 buildscript {
-    ext.cubaVersion = '6.10.8'
+    ext.cubaVersion = '7.0.5'
     repositories {
-        
         maven {
             url 'https://repo.cuba-platform.com/content/groups/work'
             credentials {
@@ -23,12 +22,9 @@ def globalModule = project(":${modulePrefix}-global")
 def coreModule = project(":${modulePrefix}-core")
 def webModule = project(":${modulePrefix}-web")
 def webToolkitModule = project(":${modulePrefix}-web-toolkit")
-def webThemesModule = project(":${modulePrefix}-web-themes")
 
 def servletApi = 'javax.servlet:javax.servlet-api:3.1.0'
 
-
-apply(plugin: 'idea')
 apply(plugin: 'cuba')
 
 cuba {
@@ -44,35 +40,14 @@ cuba {
 
 dependencies {
     appComponent("com.haulmont.cuba:cuba-global:$cubaVersion")
-
 }
 
-def hsql = 'org.hsqldb:hsqldb:2.2.9'
+def hsql = 'org.hsqldb:hsqldb:2.4.1'
 
 configure([globalModule, coreModule, webModule, webToolkitModule]) {
     apply(plugin: 'java')
     apply(plugin: 'maven')
-    apply(plugin: 'idea')
     apply(plugin: 'cuba')
-    apply(plugin: 'checkstyle')
-
-    String checkstyleConfigDir = "${rootProject.projectDir}/config/checkstyle"
-    checkstyle {
-        toolVersion = "6.2"
-        configFile = new File("${checkstyleConfigDir}/checkstyle.xml".toString())
-        configProperties = [
-                'checkstyleConfigDir': checkstyleConfigDir
-        ]
-        reportsDir = new File("${buildDir}/checkstyle".toString())
-        ignoreFailures = false
-    }
-
-    checkstyleMain << {
-        def checkstyleDir = "${project.buildDir}/checkstyle".toString()
-        ant.xslt('in': "$checkstyleDir/main.xml",
-                out: "$checkstyleDir/$project.name-checkstyle.html",
-                style: "$checkstyleConfigDir/checkstyle.xsl")
-    }
 
     dependencies {
         testCompile('junit:junit:4.12')
@@ -89,8 +64,17 @@ configure([globalModule, coreModule, webModule, webToolkitModule]) {
 }
 
 configure(globalModule) {
+    dependencies {
+        if (!JavaVersion.current().isJava8()) {
+            runtime('javax.xml.bind:jaxb-api:2.3.1')
+            runtime('org.glassfish.jaxb:jaxb-runtime:2.3.1')
+        }
+    }
+
     entitiesEnhancing {
-        main { enabled = true }
+        main {
+            enabled = true
+        }
     }
 
     jar {
@@ -99,8 +83,6 @@ configure(globalModule) {
             attributes('App-Component-Version': cuba.artifact.version + (cuba.artifact.isSnapshot ? '-SNAPSHOT' : ''))
         }
     }
-
-    
 }
 
 configure(coreModule) {
@@ -112,10 +94,9 @@ configure(coreModule) {
 
     dependencies {
         compile(globalModule)
-        provided(servletApi)
+        compileOnly(servletApi)
         jdbc(hsql)
         testRuntime(hsql)
-
     }
 
     task cleanConf(description: 'Cleans up conf directory') {
@@ -136,30 +117,29 @@ configure(coreModule) {
 
     task createDb(dependsOn: assembleDbScripts, description: 'Creates local database', type: CubaDbCreation) {
         dbms = 'hsql'
-        host = 'localhost'
-        dbName = 'touraddon'
+        host = 'localhost:9010'
+        dbName = 'tour'
         dbUser = 'sa'
         dbPassword = ''
     }
 
     task updateDb(dependsOn: assembleDbScripts, description: 'Updates local database', type: CubaDbUpdate) {
         dbms = 'hsql'
-        host = 'localhost'
-        dbName = 'touraddon'
+        host = 'localhost:9010'
+        dbName = 'tour'
         dbUser = 'sa'
         dbPassword = ''
     }
 }
-    
+
 configure(webModule) {
     configurations {
         webcontent
     }
 
     dependencies {
-        provided(servletApi)
+        compileOnly(servletApi)
         compile(globalModule)
-
     }
 
     jar {
@@ -169,7 +149,6 @@ configure(webModule) {
         }
     }
 
-    
     task webArchive(type: Zip) {
         from file("$buildDir/web")
         from file('web')
@@ -206,76 +185,54 @@ configure(webModule) {
         appName = "${modulePrefix}"
         appJars(modulePrefix + '-global', modulePrefix + '-web')
     }
+
     task buildScssThemes(type: CubaWebScssThemeCreation)
+
     task deployThemes(type: CubaDeployThemeTask, dependsOn: buildScssThemes)
+
     assemble.dependsOn buildScssThemes
-}
 
-configure(webThemesModule) {
-    apply(plugin: 'java')
-    apply(plugin: 'maven')
-    apply(plugin: 'cuba')
+    task themesJar(type: Jar) {
+        from file('themes')
+        classifier = 'themes'
+    }
 
-    appModuleType = 'web-themes'
-
-    buildDir = file('../build/scss-themes')
-
-    sourceSets {
-        main {
-            java {
-                srcDir '.'
-            }
-            resources {
-                srcDir '.'
-            }
-        }
+    artifacts {
+        archives themesJar
     }
 }
 
 configure(webToolkitModule) {
     dependencies {
         compile(webModule)
-
-        
     }
-    
+
     jar {
         from sourceSets.main.allJava
     }
-    
+
     task buildWidgetSet(type: CubaWidgetSetBuilding) {
         widgetSetClass = 'com.haulmont.addon.tour.web.toolkit.ui.AppWidgetSet'
     }
-    
+
     task debugWidgetSet(type: CubaWidgetSetDebug) {
         widgetSetClass = 'com.haulmont.addon.tour.web.toolkit.ui.AppWidgetSet'
-    } 
+    }
 
-    task webArchive(dependsOn: buildWidgetSet, type: Zip) {
+    task webArchive(dependsOn: buildWidgetSet, type: Jar) {
         from file("$buildDir/web")
-        classifier = 'web'
+        classifier = 'client'
     }
 
     artifacts {
         archives webArchive
     }
 
-    task deploy(dependsOn: buildWidgetSet) {
-        doLast {
-            delete {
-                "$cuba.tomcat.dir/webapps/${modulePrefix}/VAADIN/widgetsets"
-            }
-            copy {
-                from "$buildDir/web"
-                into "$cuba.tomcat.dir/webapps/${modulePrefix}"
-            }
-        }
+    task deploy(dependsOn: webArchive, type: Copy) {
+        from webArchive
+        into "$cuba.tomcat.dir/webapps/${modulePrefix}/WEB-INF/lib"
     }
 }
-
-
-
-
 
 task undeploy(type: Delete, dependsOn: ":${modulePrefix}-web:cleanConf") {
     delete("$cuba.tomcat.dir/shared")
@@ -294,6 +251,3 @@ task restart(dependsOn: ['stop', ":${modulePrefix}-core:deploy", ":${modulePrefi
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.3.1'
-}

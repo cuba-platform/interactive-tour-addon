@@ -1,32 +1,19 @@
-/*
- * Copyright 2017 Julien Charpenel
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour;
 
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.tour.TourClientRpc;
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.tour.TourServerRpc;
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.tour.TourState;
-import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step;
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.server.AbstractExtension;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.UI;
 
-import java.util.Collections;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * A tour consisting of one or multiple steps.
@@ -36,7 +23,6 @@ import java.util.Objects;
 @JavaScript({"vaadin://addons/producttour/js/producttour.js"})
 public class Tour extends AbstractExtension {
 
-  private final List<Step> steps;
   private final TourServerRpc serverRpc = new TourServerRpc() {
     @Override
     public void onCancel() {
@@ -76,7 +62,6 @@ public class Tour extends AbstractExtension {
    * Construct a new tour.
    */
   public Tour() {
-    this.steps = new LinkedList<>();
     registerRpc(serverRpc);
 
     extend(UI.getCurrent());
@@ -89,9 +74,11 @@ public class Tour extends AbstractExtension {
    *
    * @param listener
    *     The listener to be added
+   *
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void addShowListener(TourShowListener listener) {
-    addListener(TourShowListener.ShowEvent.class, listener, TourShowListener.SHOW_METHOD);
+  public Registration addShowListener(TourShowListener listener) {
+    return addListener(TourShowListener.ShowEvent.class, listener, TourShowListener.SHOW_METHOD);
   }
 
   /**
@@ -102,18 +89,6 @@ public class Tour extends AbstractExtension {
    */
   public void addStep(Step step) {
     step.setTour(this);
-    getState().steps.add(step);
-    steps.add(step);
-  }
-
-  @Override
-  public TourState getState() {
-    return (TourState) super.getState();
-  }
-
-  @Override
-  protected TourState getState(boolean markAsDirty) {
-    return (TourState) super.getState(markAsDirty);
   }
 
   /**
@@ -123,9 +98,7 @@ public class Tour extends AbstractExtension {
    *     The step to be removed
    */
   public void removeStep(Step step) {
-    steps.remove(step);
-    getState().steps.remove(step);
-    step.remove();
+    step.setTour(null);
   }
 
   /**
@@ -146,7 +119,28 @@ public class Tour extends AbstractExtension {
    * @return The step at the given index
    */
   public Step getStepByIndex(int index) {
-    return steps.get(index);
+    return getSteps().get(index);
+  }
+
+  /**
+   * Get the steps of the tour.
+   *
+   * @return Copy of the list containing the steps of the tour
+   */
+  public List<Step> getSteps() {
+    return getState().steps.stream()
+                           .map(c -> (Step) c)
+                           .collect(Collectors.toCollection(LinkedList::new));
+  }
+
+  @Override
+  public TourState getState() {
+    return (TourState) super.getState();
+  }
+
+  @Override
+  protected TourState getState(boolean markAsDirty) {
+    return (TourState) super.getState(markAsDirty);
   }
 
   /**
@@ -155,16 +149,7 @@ public class Tour extends AbstractExtension {
    * @return The count of steps
    */
   public int getStepCount() {
-    return steps.size();
-  }
-
-  /**
-   * Get the steps of the tour.
-   *
-   * @return The steps of the tour inside an unmodifiable container
-   */
-  public List<Step> getSteps() {
-    return Collections.unmodifiableList(steps);
+    return getSteps().size();
   }
 
   /**
@@ -202,10 +187,10 @@ public class Tour extends AbstractExtension {
    * this tour
    */
   public Step getStepById(String stepId) {
-    return steps.stream()
-                .filter(s -> Objects.equals(s.getId(), stepId))
-                .findFirst()
-                .orElse(null);
+    return getSteps().stream()
+                     .filter(s -> Objects.equals(s.getId(), stepId))
+                     .findFirst()
+                     .orElse(null);
   }
 
   /**
@@ -234,14 +219,12 @@ public class Tour extends AbstractExtension {
    *
    * @param listener
    *     The listener to be added
+   *
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void addCancelListener(TourCancelListener listener) {
-    addListener(TourCancelListener.CancelEvent.class, listener, TourCancelListener.CANCEL_METHOD);
-  }
-
-  public void removeCancelListener(TourCancelListener listener) {
-    removeListener(TourCancelListener.CancelEvent.class, listener,
-                   TourCancelListener.CANCEL_METHOD);
+  public Registration addCancelListener(TourCancelListener listener) {
+    return addListener(TourCancelListener.CancelEvent.class, listener,
+                       TourCancelListener.CANCEL_METHOD);
   }
 
   /**
@@ -249,21 +232,12 @@ public class Tour extends AbstractExtension {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addCompleteListener(TourCompleteListener listener) {
-    addListener(TourCompleteListener.CompleteEvent.class, listener,
-                TourCompleteListener.COMPLETE_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the tour.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeCompleteListener(TourCompleteListener listener) {
-    removeListener(TourCompleteListener.CompleteEvent.class, listener,
-                   TourCompleteListener.COMPLETE_METHOD);
+  public Registration addCompleteListener(TourCompleteListener listener) {
+    return addListener(TourCompleteListener.CompleteEvent.class, listener,
+                       TourCompleteListener.COMPLETE_METHOD);
   }
 
   /**
@@ -271,29 +245,11 @@ public class Tour extends AbstractExtension {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addHideListener(TourHideListener listener) {
-    addListener(TourHideListener.HideEvent.class, listener, TourHideListener.HIDE_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the tour.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeHideListener(TourHideListener listener) {
-    removeListener(TourHideListener.HideEvent.class, listener, TourHideListener.HIDE_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the tour.
-   *
-   * @param listener
-   *     The listener to be removed.
-   */
-  public void removeShowListener(TourShowListener listener) {
-    removeListener(TourShowListener.ShowEvent.class, listener, TourShowListener.SHOW_METHOD);
+  public Registration addHideListener(TourHideListener listener) {
+    return addListener(TourHideListener.HideEvent.class, listener, TourHideListener.HIDE_METHOD);
   }
 
   /**
@@ -301,20 +257,11 @@ public class Tour extends AbstractExtension {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addStartListener(TourStartListener listener) {
-    addListener(TourStartListener.StartEvent.class, listener,
-                TourStartListener.TOUR_STARTED_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the tour.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeStartListener(TourStartListener listener) {
-    removeListener(TourStartListener.StartEvent.class, listener,
-                   TourStartListener.TOUR_STARTED_METHOD);
+  public Registration addStartListener(TourStartListener listener) {
+    return addListener(TourStartListener.StartEvent.class, listener,
+                       TourStartListener.TOUR_STARTED_METHOD);
   }
 }

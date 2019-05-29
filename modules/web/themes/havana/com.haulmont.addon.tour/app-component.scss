@@ -1,0 +1,5 @@
+@import "havana-ext";
+
+@mixin com_haulmont_addon_tour {
+  @include com_haulmont_addon_tour-havana-ext;
+}

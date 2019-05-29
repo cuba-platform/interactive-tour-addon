@@ -1,6 +1,6 @@
 package com.haulmont.addon.tour.core;
 
-import com.haulmont.addon.tour.TouraddonTestContainer;
+import com.haulmont.addon.tour.TourTestContainer;
 import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 public class SampleIntegrationTest {
 
     @ClassRule
-    public static TouraddonTestContainer cont = TouraddonTestContainer.Common.INSTANCE;
+    public static TourTestContainer cont = TourTestContainer.Common.INSTANCE;
 
     private Metadata metadata;
     private Persistence persistence;

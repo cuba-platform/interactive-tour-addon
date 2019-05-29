@@ -15,12 +15,13 @@ Select a version of the add-on which is compatible with the platform version use
 
 | Platform Version| Add-on Version|
 |:----------------|:--------------|
-| 6.10.8           | 1.0.2         |
+| 7.0.5           | 1.1.0         |
+| 6.10.8          | 1.0.2         |
 
 
 Add custom application component to your project (change the version part if needed):
 ```
-com.haulmont.addon.tour:tour-global:1.0.2   
+com.haulmont.addon.tour:tour-global:1.1.0   
 ```
 
 ### Description
@@ -33,14 +34,7 @@ A tour can also be created with the help of the `parseTour()` method of `TourPar
 
 To start a tour, call the `TourStartAction`. The `setSettingsEnabled()` method allows you to define whether the tour should start each time on the screen opening or only once at the first time.
 
-### Quick start
-To use this add-on in a CUBA Studio project, in the project properties add add-on like custom application component and
-save settings.
-```
-com.haulmont.addon.tour:tour-global:1.0.2   
-```
-
-#### Sample task
+#### Step-by-step guide
 As a hands-on example, let's create a small demo app containing two screens with tours.
 
 In this app, we will:
@@ -48,25 +42,70 @@ In this app, we will:
 - define different options for the tours steps,
 - define the parameters of the tours start.
 
-#### Step-by-step guide
-Create a new CUBA project and add the given add-on to it.
+To do that:
 
-![](screenshots/1-adding-addon.png "Adding add-on")
+Create a new CUBA project.
 
-In the DATA MODEL tab create a new entity "Product" with two attributes.
+![](screenshots/1-create-new-project.png)
 
-![](screenshots/2-create-new-entity.png "Creating a new entity")
+Add the given add-on to it.
 
-Create entity browser and entity editor screens via Generic UI screen.
+![](screenshots/2-add-custom-component.png)
+
+Create a new entity "Product" with two attributes.
+
+![](screenshots/3-create-product-entity.png)
+
+```java
+package com.company.demo.entity;
+
+import com.haulmont.chile.core.annotations.NamePattern;
+import com.haulmont.cuba.core.entity.StandardEntity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import java.math.BigDecimal;
+
+@NamePattern("%s|name")
+@Table(name = "DEMO_PRODUCT")
+@Entity(name = "demo_Product")
+public class Product extends StandardEntity {
+    
+    @Column(name = "NAME")
+    protected String name;
+
+    @Column(name = "PRICE")
+    protected BigDecimal price;
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}
+```
+
+Create entity browser and entity editor screens.
+
+![](screenshots/4-create-product-browser-and-editor.png)
 
 Let's add a button which will start a tour in `ProductBrowse`, as well as implement the tours start on the screen opening.
 
 To create the button, add the component below to the `buttonsPanel` component in `product-browse.xml`:
 
 ```xml
-<button id="tourButton"
-        caption="Tutorial" 
-        invoke="startTour"/>
+<button id="startTourBtn" caption="msg://browse.startTour" invoke="startTour"/>
 ```
 
 On the `ProductBrowse` screen initialization, we will parse the tour from the JSON file which is located in the same directory with screens.
@@ -77,7 +116,7 @@ For each button we describe its attributes and the action performed on the butto
 ```JSON
 [
   {
-    "id": "step1",
+    "id": "browseStepOne",
     "text": "tour.tutorialStartedText",
     "title": "tour.tutorialStartedTitle",
     "width": "400",
@@ -100,7 +139,7 @@ For each button we describe its attributes and the action performed on the butto
     ]
   },
   {
-    "id": "step2",
+    "id": "browseStepTwo",
     "text": "tour.createButtonText",
     "title": "tour.createButtonTitle",
     "width": "400",
@@ -124,7 +163,7 @@ For each button we describe its attributes and the action performed on the butto
     ]
   },
   {
-    "id": "step3",
+    "id": "browseStepThree",
     "text": "tour.editButtonText",
     "title": "tour.editButtonTitle",
     "width": "400",
@@ -148,7 +187,7 @@ For each button we describe its attributes and the action performed on the butto
     ]
   },
   {
-    "id": "step4",
+    "id": "browseStepFour",
     "text": "tour.removeButtonText",
     "title": "tour.removeButtonTitle",
     "width": "400",
@@ -172,7 +211,7 @@ For each button we describe its attributes and the action performed on the butto
     ]
   },
   {
-    "id": "step5",
+    "id": "browseStepFive",
     "text": "tour.filterPanelText",
     "title": "tour.filterPanelTitle",
     "width": "400",
@@ -199,171 +238,190 @@ For each button we describe its attributes and the action performed on the butto
 ]
 ```
 
-To start the tour let's create a method `startTour()` to create an action which will start the tour. We'll disable the setting 
-of starting a tour only one on the first screen opening. This method will be invoked on the `tourButton` click. Additionally,
- let's call this method at the screen initialization. 
+To start the tour let's create a method `startTour()`. We'll disable the setting of starting a tour only one on the first screen opening.
+This method will be invoked on the `tourButton` click. Additionally,let's call this method at the screen initialization. 
 
 `ProductBrowse.java` should look like this:
 ```Java
-package com.company.touraddondemo.web.product;
+package com.company.demo.web.product;
 
+import com.haulmont.cuba.gui.screen.*;
+import com.company.demo.entity.Product;
 import com.haulmont.addon.tour.web.gui.components.Tour;
 import com.haulmont.addon.tour.web.gui.components.TourStartAction;
 import com.haulmont.addon.tour.web.gui.utils.TourParser;
 import com.haulmont.cuba.core.global.Resources;
-import com.haulmont.cuba.gui.components.AbstractLookup;
 
 import javax.inject.Inject;
-import java.util.Map;
 
-public class ProductBrowse extends AbstractLookup {
+@UiController("demo_Product.browse")
+@UiDescriptor("product-browse.xml")
+@LookupComponent("productsTable")
+@LoadDataBeforeShow
+public class ProductBrowse extends StandardLookup<Product> {
 
     @Inject
     protected Resources resources;
-
     @Inject
     protected TourParser tourParser;
+    @Inject
+    private MessageBundle messageBundle;
 
     protected Tour tour;
+    protected TourStartAction tourStartAction;
 
-   @Override
-   public void init(Map<String, Object> params) { 
-       super.init(params);
-   
-       createTour(); // Create a tour
-   
-       startTour(); // Start the tour
-   }
-   
-   protected void createTour() {
-       // The path to your source folder
-       String sourceFolder = "com/company/touraddondemo/web/product/";
-       // Your JSON file
-       String file = resources.getResourceAsString(sourceFolder + "productBrowseTour.json");
-       // Parse your tour from your JSON using given messages pack and extending this window
-       tour = tourParser.parseTour(file, getMessagesPack(), this); 
-   }
-   
-   public void startTour() {
-       // Create an action to start the tour
-       TourStartAction tourStartAction = TourStartAction.create(tour);
-       // Set that tour will start every time
-       tourStartAction.setSettingsEnabled(false);
-       // Perform the start action by this window
-       tourStartAction.actionPerform(this); 
-   }
+    @Subscribe
+    private void onInit(InitEvent event) {
+        createTour();
+        createTourStartAction();
+        startTour();
+    }
+
+    protected void createTour() {
+        String jsonTourDescriptionLocation = "com/company/demo/web/product/productBrowseTour.json";
+        String jsonTourDescription = resources.getResourceAsString(jsonTourDescriptionLocation);
+        tour = tourParser.parseTour(jsonTourDescription, messageBundle.getMessagesPack(), getWindow());
+    }
+
+    protected void createTourStartAction() {
+        tourStartAction = TourStartAction.create(tour);
+        // The Tour will start each time if the settings disabled
+        tourStartAction.setSettingsEnabled(false);
+    }
+
+    public void startTour() {
+        tourStartAction.actionPerform(getWindow());
+    }
 }
 ```
 
-At the `ProductEdit` screen in the `postInit()` method we will call the `createTour()` method where we create a tour instance, 
-add the steps, their parameters, and buttons. Also, in the `postInit()` method we create an action that will start a tour 
+At the `ProductEdit` screen in the `onInit` method we will call the `createTour()` method where we create a tour instance, 
+add the steps, their parameters, and buttons. Also, in the `onInit` method we create an action that will start a tour 
 without disabling additional settings.
 
 `ProductEdit.java` should look like this:
 ```Java
-package com.company.touraddondemo.web.product;
+package com.company.demo.web.product;
 
-import com.company.touraddondemo.entity.Product;
+import com.company.demo.entity.Product;
 import com.haulmont.addon.tour.web.gui.components.*;
-import com.haulmont.cuba.gui.ComponentsHelper;
-import com.haulmont.cuba.gui.components.AbstractEditor;
+import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Form;
+import com.haulmont.cuba.gui.screen.*;
 
-import java.util.Objects;
+import javax.inject.Inject;
 
-public class ProductEdit extends AbstractEditor<Product> {
+@UiController("demo_Product.edit")
+@UiDescriptor("product-edit.xml")
+@EditedEntityContainer("productDc")
+@LoadDataBeforeShow
+public class ProductEdit extends StandardEditor<Product> {
+
+    @Inject
+    private Form form;
+    @Inject
+    private Button windowClose;
+    @Inject
+    private MessageBundle messageBundle;
 
     protected Tour tour;
+    protected TourStartAction tourStartAction;
 
-    @Override
-    protected void postInit() {
-        super.postInit();
-
-        // Create a tour
-        createTour(); 
-        
-        // Create an action to start the tour
-        TourStartAction tourStartAction = TourStartAction.create(tour);
-        // Perform the start action by this window
-        tourStartAction.actionPerform(this); 
+    @Subscribe
+    private void onInit(InitEvent event) {
+        createTour();
+        tourStartAction = TourStartAction.create(tour);
+        tourStartAction.actionPerform(getWindow());
     }
-        
-    // Creates the tour by JAVA classes
+
     protected void createTour() {
-        // Create a tour extending this window
-        tour = new Tour(this); 
-        
-        // Create a step with your own id, might be null
-        Step step = new Step("step1"); 
-        step.setText(getMessage("tour.editStartedText"));
-        step.setTitle(getMessage("tour.editStartedTitle"));
+        tour = new Tour(getWindow());
+        tour.addStep(createStepOne());
+        tour.addStep(createStepTwo());
+        tour.addStep(createStepThree());
+    }
+
+    protected Step createStepOne() {
+        Step step = new Step("editStepOne");
+
+        step.setText(messageBundle.getMessage("tour.editStartedText"));
+        step.setTitle(messageBundle.getMessage("tour.editStartedTitle"));
         step.setWidth("400");
         step.setTextContentMode(ContentMode.HTML);
         step.setTitleContentMode(ContentMode.HTML);
         step.setCancellable(true);
-        
-        // Create a step button with your own caption
-        StepButton stepButton = new StepButton(getMessage("tour.cancel")); 
-        // You could set your own style to the step button
-        stepButton.setStyleName("danger"); 
+
+        StepButton stepButton = new StepButton(messageBundle.getMessage("tour.cancel"));
+        stepButton.setStyleName("danger");
         stepButton.setEnabled(true);
-        // You could use predefined actions from TourActionType and StepActionType or create 
-        // your own StepButtonClickListener
-        stepButton.addStepButtonClickListener(TourActionType.CANCEL::execute); 
+        stepButton.addStepButtonClickListener(TourActionType.CANCEL::execute);
+
         step.addButton(stepButton);
 
-        stepButton = new StepButton(getMessage("tour.next"));
+        stepButton = new StepButton(messageBundle.getMessage("tour.next"));
         stepButton.setStyleName("friendly");
         stepButton.setEnabled(true);
         stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
+
         step.addButton(stepButton);
 
-        tour.addStep(step);
+        return step;
+    }
 
-        step = new Step("step2");
-        step.setText(getMessage("tour.fieldGroupText"));
-        step.setTitle(getMessage("tour.fieldGroupTitle"));
+    protected Step createStepTwo() {
+        Step step = new Step("editStepTwo");
+
+        step.setText(messageBundle.getMessage("tour.formText"));
+        step.setTitle(messageBundle.getMessage("tour.formTitle"));
         step.setWidth("400");
         step.setTextContentMode(ContentMode.HTML);
         step.setTitleContentMode(ContentMode.HTML);
-        step.setAttachedTo(Objects.requireNonNull(ComponentsHelper.findComponent(getFrame(), "fieldGroup")));
+        step.setAttachedTo(form);
         step.setAnchor(StepAnchor.RIGHT);
 
-        stepButton = new StepButton(getMessage("tour.back"));
+        StepButton stepButton = new StepButton(messageBundle.getMessage("tour.back"));
         stepButton.setStyleName("primary");
         stepButton.setEnabled(true);
         stepButton.addStepButtonClickListener(TourActionType.BACK::execute);
+
         step.addButton(stepButton);
 
-        stepButton = new StepButton(getMessage("tour.next"));
+        stepButton = new StepButton(messageBundle.getMessage("tour.next"));
         stepButton.setStyleName("friendly");
         stepButton.setEnabled(true);
         stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
+
         step.addButton(stepButton);
 
-        tour.addStep(step);
+        return step;
+    }
 
-        step = new Step("step3");
-        step.setText(getMessage("tour.windowActionsText"));
-        step.setTitle(getMessage("tour.windowActionsTitle"));
+    protected Step createStepThree() {
+        Step step = new Step("editStepThree");
+
+        step.setText(messageBundle.getMessage("tour.windowActionsText"));
+        step.setTitle(messageBundle.getMessage("tour.windowActionsTitle"));
         step.setWidth("400");
         step.setTextContentMode(ContentMode.HTML);
         step.setTitleContentMode(ContentMode.HTML);
-        step.setAttachedTo(Objects.requireNonNull(ComponentsHelper.findComponent(getFrame(), "windowClose")));
+        step.setAttachedTo(windowClose);
         step.setAnchor(StepAnchor.RIGHT);
 
-        stepButton = new StepButton(getMessage("tour.back"));
+        StepButton stepButton = new StepButton(messageBundle.getMessage("tour.back"));
         stepButton.setStyleName("primary");
         stepButton.setEnabled(true);
         stepButton.addStepButtonClickListener(TourActionType.BACK::execute);
+
         step.addButton(stepButton);
 
-        stepButton = new StepButton(getMessage("tour.finish"));
+        stepButton = new StepButton(messageBundle.getMessage("tour.finish"));
         stepButton.setStyleName("friendly");
         stepButton.setEnabled(true);
         stepButton.addStepButtonClickListener(TourActionType.NEXT::execute);
+
         step.addButton(stepButton);
 
-        tour.addStep(step);
+        return step;
     }
 }
 ```
@@ -371,6 +429,9 @@ public class ProductEdit extends AbstractEditor<Product> {
 In order to display localized messages, put them in `messages.properties`:
 
 ```properties
+browseCaption=Products
+editorCaption=Product
+browse.startTour=Toturial
 tour.createButtonText = <p>This is a <b>create button</b>.</p> \
   <p>Press the button to open an editor screen to <b>create</b> a new entity.</p>
 tour.editButtonText = <p>This is an <b>edit button</b>.</p> \
@@ -379,7 +440,7 @@ tour.removeButtonText = <p>This is a <b>remove button</b>.</p> \
   <p>Select an entity and press the button to remove the entity.</p>
 tour.filterPanelText = <p>This is a <b>filter panel</b>.</p> \
   <p>You may choose conditions to filter entities.</p>
-tour.fieldGroupText = <p>This is a <b>field group</b> consisting of text fields.</p> \
+tour.formText = <p>This is a <b>form</b> consisting of text fields.</p> \
   <p>You may fill the fields by your own data.</p>
 tour.windowActionsText = <p>These are window <b>actions</b>.</p> \
   <p>You are able to <b>confirm</b> or <b>decline</b> changes.</p>
@@ -394,7 +455,7 @@ tour.createButtonTitle = <b>Create button</b>
 tour.editButtonTitle = <b>Edit button</b>
 tour.removeButtonTitle = <b>Remove button</b>
 tour.filterPanelTitle = <b>Filter Panel</b>
-tour.fieldGroupTitle = <b>Field group</b>
+tour.formTitle = <b>Field group</b>
 tour.windowActionsTitle = <b>Window actions</b>
 tour.back = Back
 tour.next = Next
@@ -402,24 +463,21 @@ tour.cancel = Cancel
 tour.finish = Finish
 ```
 
-For the correct display of the new components, we will need CSS classes that come with the add-on theme. To make them available for this project, we need to create a theme extension in Project Properties.
+Now, when the user opens the `Products` screen, each time they will see the tour.
+Moreover, they will be able to start the tour by clicking the "Tutorial" button. As for `Product` screen, the tour will start only at the first screen opening for each user.
 
-![](screenshots/3-theme-extention.png "Create extension theme")  
+This is how the `Products` screen looks in the running app:
 
-Now, when the user opens the `ProductBrowse` screen, each time they will see the tour. Moreover, they will be able to start the tour by clicking the "Tutorial" button. As for `ProductEdit` screen, the tour will start only at the first screen opening for each user.
+![](screenshots/5-products-first.png)
 
-This is how the `ProductBrowse` screen looks in the running app:
+This is how the `Products` screen looks with the step bound to the component:
 
-![](screenshots/4-run-application-product-browse.png "View of the ProductBrowse screen in the running app")
+![](screenshots/6-products-second.png)
 
-This is how the `ProductBrowse` screen looks with the step bound to the component:
+This is how the `Product` screen looks in the running app:
 
-![](screenshots/6-run-application-product-browse-2.png "View of the ProductBrowse screen in the running app")
+![](screenshots/7-product-first.png)
 
-This is how the `ProductEdit` screen looks in the running app:
+This is how the `Product` screen looks with the step bound to the component:
 
-![](screenshots/5-run-application-product-edit.png "View of the ProductEdit screen in the running app")
-
-This is how the `ProductEdit` screen looks with the step bound to the component:
-
-![](screenshots/7-run-application-product-edit-2.png "View of the ProductEdit screen in the running app")
+![](screenshots/8-product-second.png)

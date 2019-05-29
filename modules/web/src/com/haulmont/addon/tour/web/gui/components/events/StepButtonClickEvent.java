@@ -7,6 +7,7 @@ import com.haulmont.addon.tour.web.gui.components.events.StepButtonProvider;
 import com.haulmont.addon.tour.web.gui.components.events.StepProvider;
 import com.haulmont.addon.tour.web.gui.components.events.TourProvider;
 import com.haulmont.cuba.gui.components.Component;
+import com.haulmont.cuba.gui.components.MouseEventDetails;
 
 import java.util.EventObject;
 
@@ -14,7 +15,7 @@ import java.util.EventObject;
  * Event class that contains information about a click.
  */
 public class StepButtonClickEvent extends EventObject implements TourProvider, StepProvider, StepButtonProvider {
-    protected Component.MouseEventDetails details;
+    protected MouseEventDetails details;
 
     /**
      * Constructs a new provider.
@@ -25,12 +26,12 @@ public class StepButtonClickEvent extends EventObject implements TourProvider, S
         this(source, null);
     }
 
-    public StepButtonClickEvent(StepButton source, Component.MouseEventDetails details) {
+    public StepButtonClickEvent(StepButton source, MouseEventDetails details) {
         super(source);
         this.details = details;
     }
 
-    public Component.MouseEventDetails getDetails() {
+    public MouseEventDetails getDetails() {
         return details;
     }
 

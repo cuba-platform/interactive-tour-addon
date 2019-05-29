@@ -5,15 +5,30 @@
 
 package com.haulmont.addon.tour.web.gui.components;
 
+import com.haulmont.bali.events.EventHub;
+
 /**
  * Base class for web extensions.
  */
 public abstract class AbstractExtension<T extends com.vaadin.server.AbstractExtension> {
 
-    public AbstractExtension() {
+    protected T extension;
+
+    // private, lazily initialized
+    private EventHub eventHub = null;
+
+    protected EventHub getEventHub() {
+        if (eventHub == null) {
+            eventHub = new EventHub();
+        }
+        return eventHub;
     }
 
-    protected T extension;
+    protected <E> void publish(Class<E> eventType, E event) {
+        if (eventHub != null) {
+            eventHub.publish(eventType, event);
+        }
+    }
 
     /**
      * Gets client specific component instance. Can be used in client module to simplify invocation of underlying API.

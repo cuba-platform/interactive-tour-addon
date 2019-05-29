@@ -1,26 +1,13 @@
-/*
- * Copyright 2017 Julien Charpenel
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button;
 
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.button.StepButtonServerRpc;
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.button.StepButtonState;
-import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.shared.MouseEventDetails;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.AbstractComponent;
+
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -92,10 +79,12 @@ public class StepButton extends AbstractExtension {
    *
    * @param listener
    *     The listener to be added
+   *
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void addClickListener(StepButtonClickListener listener) {
-    addListener(StepButtonClickListener.ClickEvent.class, listener,
-                StepButtonClickListener.CLICK_METHOD);
+  public Registration addClickListener(StepButtonClickListener listener) {
+    return addListener(StepButtonClickListener.ClickEvent.class, listener,
+                       StepButtonClickListener.CLICK_METHOD);
   }
 
   @Override
@@ -118,17 +107,6 @@ public class StepButton extends AbstractExtension {
    */
   public StepButton(String caption, StepButtonClickListener clickListener) {
     this(caption, "", clickListener);
-  }
-
-  /**
-   * Remove the given click listener from the button.
-   *
-   * @param listener
-   *     The listener to be removed
-   */
-  public void removeClickListener(StepButtonClickListener listener) {
-    removeListener(StepButtonClickListener.ClickEvent.class, listener,
-                   StepButtonClickListener.CLICK_METHOD);
   }
 
   /**
@@ -262,7 +240,16 @@ public class StepButton extends AbstractExtension {
    *     The step the button should be added to
    */
   public void setStep(Step step) {
+    if (this.step != null) {
+      this.step.getState().buttons.remove(this);
+      remove();
+    }
+
+    if (step != null) {
+      extend(step);
+      step.getState().buttons.add(this);
+    }
+
     this.step = step;
-    extend(step);
   }
 }

@@ -1,32 +1,19 @@
-/*
- * Copyright 2017 Julien Charpenel
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step;
 
-import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton;
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.step.*;
-import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.Tour;
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.server.SizeWithUnit;
 import com.vaadin.server.Sizeable;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.AbstractComponent;
 
-import java.util.Collections;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button.StepButton;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.Tour;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * A single step of a tour.
@@ -37,7 +24,6 @@ public class Step extends AbstractExtension implements Sizeable {
 
   private static final StepAnchor DEFAULT_ANCHOR = StepAnchor.RIGHT;
 
-  private final List<StepButton> buttons;
   private final StepServerRpc serverRpc = new StepServerRpc() {
     @Override
     public void onCancel() {
@@ -112,7 +98,6 @@ public class Step extends AbstractExtension implements Sizeable {
    *     The anchor of the step relative to the given component
    */
   public Step(String id, AbstractComponent attachTo, StepAnchor anchor) {
-    this.buttons = new LinkedList<>();
     registerRpc(serverRpc);
 
     setId(id);
@@ -288,8 +273,17 @@ public class Step extends AbstractExtension implements Sizeable {
    *     The tour the step should be added to
    */
   public void setTour(Tour tour) {
+    if (this.tour != null) {
+      this.tour.getState().steps.remove(this);
+      remove();
+    }
+
+    if (tour != null) {
+      extend(tour);
+      tour.getState().steps.add(this);
+    }
+
     this.tour = tour;
-    extend(tour);
   }
 
   /**
@@ -505,8 +499,6 @@ public class Step extends AbstractExtension implements Sizeable {
    */
   public void addButton(StepButton button) {
     button.setStep(this);
-    getState().buttons.add(button);
-    buttons.add(button);
   }
 
   /**
@@ -516,9 +508,7 @@ public class Step extends AbstractExtension implements Sizeable {
    *     The button to be removed
    */
   public void removeButton(StepButton button) {
-    buttons.remove(button);
-    getState().buttons.remove(button);
-    button.remove();
+    button.setStep(null);
   }
 
   /**
@@ -530,7 +520,19 @@ public class Step extends AbstractExtension implements Sizeable {
    * @return The button at the given index
    */
   public StepButton getButtonByIndex(int index) {
-    return buttons.get(index);
+    return getButtons().get(index);
+  }
+
+  /**
+   * Get the buttons of the step.
+   *
+   * @return Copy of the list containing the buttons of the step
+   */
+  public List<StepButton> getButtons() {
+    return getState().buttons
+               .stream()
+               .map(c -> (StepButton) c)
+               .collect(Collectors.toCollection(LinkedList::new));
   }
 
   /**
@@ -539,16 +541,7 @@ public class Step extends AbstractExtension implements Sizeable {
    * @return The count of buttons of this step
    */
   public int getButtonCount() {
-    return buttons.size();
-  }
-
-  /**
-   * Get the buttons of the step.
-   *
-   * @return The buttons of the step inside an unmodifiable container
-   */
-  public List<StepButton> getButtons() {
-    return Collections.unmodifiableList(buttons);
+    return getButtons().size();
   }
 
   /**
@@ -591,20 +584,12 @@ public class Step extends AbstractExtension implements Sizeable {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addCancelListener(StepCancelListener listener) {
-    addListener(StepCancelListener.CancelEvent.class, listener, StepCancelListener.CANCEL_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the step.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeCancelListener(StepCancelListener listener) {
-    removeListener(StepCancelListener.CancelEvent.class, listener,
-                   StepCancelListener.CANCEL_METHOD);
+  public Registration addCancelListener(StepCancelListener listener) {
+    return addListener(StepCancelListener.CancelEvent.class, listener,
+                       StepCancelListener.CANCEL_METHOD);
   }
 
   /**
@@ -612,21 +597,12 @@ public class Step extends AbstractExtension implements Sizeable {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addCompleteListener(StepCompleteListener listener) {
-    addListener(StepCompleteListener.CompleteEvent.class, listener,
-                StepCompleteListener.COMPLETE_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the step.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeCompleteListener(StepCompleteListener listener) {
-    removeListener(StepCompleteListener.CompleteEvent.class, listener,
-                   StepCompleteListener.COMPLETE_METHOD);
+  public Registration addCompleteListener(StepCompleteListener listener) {
+    return addListener(StepCompleteListener.CompleteEvent.class, listener,
+                       StepCompleteListener.COMPLETE_METHOD);
   }
 
   /**
@@ -634,19 +610,11 @@ public class Step extends AbstractExtension implements Sizeable {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addHideListener(StepHideListener listener) {
-    addListener(StepHideListener.HideEvent.class, listener, StepHideListener.HIDE_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the step.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeHideListener(StepHideListener listener) {
-    removeListener(StepHideListener.HideEvent.class, listener, StepHideListener.HIDE_METHOD);
+  public Registration addHideListener(StepHideListener listener) {
+    return addListener(StepHideListener.HideEvent.class, listener, StepHideListener.HIDE_METHOD);
   }
 
   /**
@@ -654,18 +622,10 @@ public class Step extends AbstractExtension implements Sizeable {
    *
    * @param listener
    *     The listener to be added
-   */
-  public void addShowListener(StepShowListener listener) {
-    addListener(StepShowListener.ShowEvent.class, listener, StepShowListener.SHOW_METHOD);
-  }
-
-  /**
-   * Remove the given listener from the step.
    *
-   * @param listener
-   *     The listener to be removed.
+   * @return A {@link Registration} object to be able to remove the listener
    */
-  public void removeShowListener(StepShowListener listener) {
-    removeListener(StepShowListener.ShowEvent.class, listener, StepShowListener.SHOW_METHOD);
+  public Registration addShowListener(StepShowListener listener) {
+    return addListener(StepShowListener.ShowEvent.class, listener, StepShowListener.SHOW_METHOD);
   }
 }

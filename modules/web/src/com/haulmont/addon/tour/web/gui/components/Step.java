@@ -9,9 +9,17 @@ import com.haulmont.addon.tour.web.gui.components.events.StepCancelEvent;
 import com.haulmont.addon.tour.web.gui.components.events.StepCompleteEvent;
 import com.haulmont.addon.tour.web.gui.components.events.StepHideEvent;
 import com.haulmont.addon.tour.web.gui.components.events.StepShowEvent;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCancelListener;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCompleteListener;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepHideListener;
+import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepShowListener;
+import com.haulmont.bali.events.Subscription;
 import com.haulmont.bali.util.Preconditions;
+import com.haulmont.cuba.gui.ComponentsHelper;
 import com.haulmont.cuba.gui.components.Component;
-import com.haulmont.cuba.web.gui.components.WebAbstractComponent;
+import com.haulmont.cuba.gui.components.SizeUnit;
+import com.haulmont.cuba.web.gui.components.WebWrapperUtils;
+import com.vaadin.shared.Registration;
 import com.vaadin.ui.AbstractComponent;
 import org.apache.commons.lang3.StringUtils;
 
@@ -32,15 +40,10 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
 
     protected List<StepButton> buttonList = new ArrayList<>();
 
-    protected List<Consumer<StepCancelEvent>> stepCancelListeners = null;
-    protected List<Consumer<StepCompleteEvent>> stepCompleteListeners = null;
-    protected List<Consumer<StepHideEvent>> stepHideListeners = null;
-    protected List<Consumer<StepShowEvent>> stepShowListeners = null;
-
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCancelListener stepCancelListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCompleteListener stepCompleteListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepHideListener stepHideListener;
-    protected com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepShowListener stepShowListener;
+    protected Registration stepCancelListener;
+    protected Registration stepCompleteListener;
+    protected Registration stepHideListener;
+    protected Registration stepShowListener;
 
     protected Component attachedTo;
 
@@ -88,9 +91,6 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      * @param tour the tour the step should be added to
      */
     public void setTour(Tour tour) {
-        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.Tour vaadinTour =
-                tour.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.tour.Tour.class);
-        extension.setTour(vaadinTour);
         this.tour = tour;
     }
 
@@ -195,7 +195,8 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      * @return the height units
      */
     public int getHeightUnits() {
-        return WebAbstractComponent.UNIT_SYMBOLS.indexOf(extension.getHeightUnits());
+        SizeUnit heightUnits = WebWrapperUtils.toSizeUnit(extension.getHeightUnits());
+        return ComponentsHelper.convertFromSizeUnit(heightUnits);
     }
 
     /**
@@ -204,7 +205,8 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      * @return the width units
      */
     public int getWidthUnits() {
-        return WebAbstractComponent.UNIT_SYMBOLS.indexOf(extension.getWidthUnits());
+        SizeUnit widthUnits = WebWrapperUtils.toSizeUnit(extension.getHeightUnits());
+        return ComponentsHelper.convertFromSizeUnit(widthUnits);
     }
 
     /**
@@ -452,23 +454,16 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addCancelListener(Consumer<StepCancelEvent> listener) {
-        if (stepCancelListeners == null) {
-            stepCancelListeners = new ArrayList<>();
-
-            this.stepCancelListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCancelListener) event -> {
-                StepCancelEvent e = new StepCancelEvent(Step.this);
-                for (Consumer<StepCancelEvent> stepCancelListener : stepCancelListeners) {
-                    stepCancelListener.accept(e);
-                }
-            };
-
-            extension.addCancelListener(this.stepCancelListener);
-
+    public Subscription addCancelListener(Consumer<StepCancelEvent> listener) {
+        if (stepCancelListener == null) {
+            stepCancelListener = extension.addCancelListener(this::onStepCancel);
         }
-        if (!stepCancelListeners.contains(listener)) {
-            stepCancelListeners.add(listener);
-        }
+        return getEventHub().subscribe(StepCancelEvent.class, listener);
+    }
+
+    protected void onStepCancel(StepCancelListener.CancelEvent event) {
+        StepCancelEvent e = new StepCancelEvent(Step.this);
+        publish(StepCancelEvent.class, e);
     }
 
     /**
@@ -476,16 +471,8 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeCancelListener(Consumer<StepCancelEvent> listener) {
-        if (stepCancelListeners != null) {
-            stepCancelListeners.remove(listener);
-
-            if (stepCancelListeners.isEmpty()) {
-                stepCancelListeners = null;
-                extension.removeCancelListener(this.stepCancelListener);
-                this.stepCancelListener = null;
-            }
-        }
     }
 
     /**
@@ -493,23 +480,16 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addCompleteListener(Consumer<StepCompleteEvent> listener) {
-        if (stepCompleteListeners == null) {
-            stepCompleteListeners = new ArrayList<>();
-
-            this.stepCompleteListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepCompleteListener) event -> {
-                StepCompleteEvent e = new StepCompleteEvent(Step.this);
-                for (Consumer<StepCompleteEvent> stepCompleteListener : stepCompleteListeners) {
-                    stepCompleteListener.accept(e);
-                }
-            };
-
-            extension.addCompleteListener(this.stepCompleteListener);
-
+    public Subscription addCompleteListener(Consumer<StepCompleteEvent> listener) {
+        if (stepCompleteListener == null) {
+            stepCompleteListener = extension.addCompleteListener(this::onStepComplete);
         }
-        if (!stepCompleteListeners.contains(listener)) {
-            stepCompleteListeners.add(listener);
-        }
+        return getEventHub().subscribe(StepCompleteEvent.class, listener);
+    }
+
+    protected void onStepComplete(StepCompleteListener.CompleteEvent event) {
+        StepCompleteEvent e = new StepCompleteEvent(Step.this);
+        publish(StepCompleteEvent.class, e);
     }
 
     /**
@@ -517,16 +497,8 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeCompleteListener(Consumer<StepCompleteEvent> listener) {
-        if (stepCompleteListeners != null) {
-            stepCompleteListeners.remove(listener);
-
-            if (stepCompleteListeners.isEmpty()) {
-                stepCompleteListeners = null;
-                extension.removeCompleteListener(this.stepCompleteListener);
-                this.stepCompleteListener = null;
-            }
-        }
     }
 
     /**
@@ -534,23 +506,16 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addHideListener(Consumer<StepHideEvent> listener) {
-        if (stepHideListeners == null) {
-            stepHideListeners = new ArrayList<>();
-
-            this.stepHideListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepHideListener) event -> {
-                StepHideEvent e = new StepHideEvent(Step.this);
-                for (Consumer<StepHideEvent> stepHideListener : stepHideListeners) {
-                    stepHideListener.accept(e);
-                }
-            };
-
-            extension.addHideListener(this.stepHideListener);
-
+    public Subscription addHideListener(Consumer<StepHideEvent> listener) {
+        if (stepHideListener == null) {
+            stepHideListener = extension.addHideListener(this::onStepHide);
         }
-        if (!stepHideListeners.contains(listener)) {
-            stepHideListeners.add(listener);
-        }
+        return getEventHub().subscribe(StepHideEvent.class, listener);
+    }
+
+    protected void onStepHide(StepHideListener.HideEvent event) {
+        StepHideEvent e = new StepHideEvent(Step.this);
+        publish(StepHideEvent.class, e);
     }
 
 
@@ -559,16 +524,8 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be removed.
      */
+    @Deprecated
     public void removeHideListener(Consumer<StepHideEvent> listener) {
-        if (stepHideListeners != null) {
-            stepHideListeners.remove(listener);
-
-            if (stepHideListeners.isEmpty()) {
-                stepHideListeners = null;
-                extension.removeHideListener(this.stepHideListener);
-                this.stepHideListener = null;
-            }
-        }
     }
 
     /**
@@ -576,41 +533,25 @@ public class Step extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      *
      * @param listener the listener to be added
      */
-    public void addShowListener(Consumer<StepShowEvent> listener) {
-        if (stepShowListeners == null) {
-            stepShowListeners = new ArrayList<>();
-
-            this.stepShowListener = (com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.StepShowListener) event -> {
-                StepShowEvent e = new StepShowEvent(Step.this);
-                for (Consumer<StepShowEvent> stepShowListener : stepShowListeners) {
-                    stepShowListener.accept(e);
-                }
-            };
-
-            extension.addShowListener(this.stepShowListener);
-
+    public Subscription addShowListener(Consumer<StepShowEvent> listener) {
+        if (stepShowListener == null) {
+            stepShowListener = extension.addShowListener(this::onStepShow);
         }
-        if (!stepShowListeners.contains(listener)) {
-            stepShowListeners.add(listener);
-        }
+        return getEventHub().subscribe(StepShowEvent.class, listener);
     }
 
+    protected void onStepShow(StepShowListener.ShowEvent event) {
+        StepShowEvent e = new StepShowEvent(Step.this);
+        publish(StepShowEvent.class, e);
+    }
 
     /**
      * Removes the given listener from the step.
      *
      * @param listener the listener to be removed
      */
+    @Deprecated
     public void removeShowListener(Consumer<StepShowEvent> listener) {
-        if (stepShowListeners != null) {
-            stepShowListeners.remove(listener);
-
-            if (stepShowListeners.isEmpty()) {
-                stepShowListeners = null;
-                extension.removeShowListener(this.stepShowListener);
-                this.stepShowListener = null;
-            }
-        }
     }
 
     /**
