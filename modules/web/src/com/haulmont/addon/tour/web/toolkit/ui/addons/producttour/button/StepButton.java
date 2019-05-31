@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017 Julien Charpenel
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.button;
 
 import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.button.StepButtonServerRpc;
@@ -5,7 +20,6 @@ import com.haulmont.addon.tour.web.toolkit.ui.client.addons.producttour.button.S
 import com.vaadin.server.AbstractExtension;
 import com.vaadin.shared.MouseEventDetails;
 import com.vaadin.shared.Registration;
-import com.vaadin.ui.AbstractComponent;
 
 import com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step;
 
@@ -148,7 +162,7 @@ public class StepButton extends AbstractExtension {
   }
 
   /**
-   * @see AbstractComponent#addStyleName(String)
+   * @see com.vaadin.ui.AbstractComponent#addStyleName(String)
    */
   public void addStyleName(String style) {
     if (style == null || "".equals(style)) {
@@ -173,7 +187,7 @@ public class StepButton extends AbstractExtension {
   }
 
   /**
-   * @see AbstractComponent#removeStyleName(String)
+   * @see com.vaadin.ui.AbstractComponent#removeStyleName(String)
    */
   public void removeStyleName(String style) {
     StepButtonState state = getState();
@@ -186,7 +200,7 @@ public class StepButton extends AbstractExtension {
   }
 
   /**
-   * @see AbstractComponent#getStyleName()
+   * @see com.vaadin.ui.AbstractComponent#getStyleName()
    */
   public String getStyleName() {
     String s = "";
@@ -203,7 +217,7 @@ public class StepButton extends AbstractExtension {
   }
 
   /**
-   * @see AbstractComponent#setStyleName(String)
+   * @see com.vaadin.ui.AbstractComponent#setStyleName(String)
    */
   public void setStyleName(String style) {
     if (style == null || "".equals(style)) {

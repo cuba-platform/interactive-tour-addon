@@ -51,7 +51,7 @@ public class TourTestContainer extends TestContainer {
         dbPassword = resourceElem.attributeValue("password");
     }
 
-    public static class Common extends TourTestContainer {
+    public static final class Common extends TourTestContainer {
 
         public static final TourTestContainer.Common INSTANCE = new TourTestContainer.Common();
 

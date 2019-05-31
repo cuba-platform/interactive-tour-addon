@@ -1,7 +1,6 @@
 package com.haulmont.addon.tour.web.gui.components.events;
 
 import com.haulmont.addon.tour.web.gui.components.Tour;
-import com.haulmont.addon.tour.web.gui.components.events.TourProvider;
 
 import java.util.EventObject;
 

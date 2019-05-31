@@ -90,7 +90,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      */
     public void addStep(Step step) {
         step.setTour(this);
-        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep = step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep =
+                step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
         extension.addStep(vaadinStep);
         stepList.add(step);
     }
@@ -101,7 +102,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
      * @param step the step to be removed
      */
     public void removeStep(Step step) {
-        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep = step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
+        com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep =
+                step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
         extension.removeStep(vaadinStep);
         stepList.remove(step);
     }
@@ -203,7 +205,8 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
     @Nullable
     protected Step getStepByVaadinStep(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step vaadinStep) {
         for (Step step : getSteps()) {
-            com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step internalVaadinStep = step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
+            com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step internalVaadinStep =
+                    step.unwrap(com.haulmont.addon.tour.web.toolkit.ui.addons.producttour.step.Step.class);
             if (internalVaadinStep == vaadinStep) {
                 return step;
             }

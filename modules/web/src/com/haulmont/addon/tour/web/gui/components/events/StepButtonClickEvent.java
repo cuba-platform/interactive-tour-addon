@@ -3,10 +3,6 @@ package com.haulmont.addon.tour.web.gui.components.events;
 import com.haulmont.addon.tour.web.gui.components.Step;
 import com.haulmont.addon.tour.web.gui.components.StepButton;
 import com.haulmont.addon.tour.web.gui.components.Tour;
-import com.haulmont.addon.tour.web.gui.components.events.StepButtonProvider;
-import com.haulmont.addon.tour.web.gui.components.events.StepProvider;
-import com.haulmont.addon.tour.web.gui.components.events.TourProvider;
-import com.haulmont.cuba.gui.components.Component;
 import com.haulmont.cuba.gui.components.MouseEventDetails;
 
 import java.util.EventObject;
