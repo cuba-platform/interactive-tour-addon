@@ -15,13 +15,14 @@ Select a version of the add-on which is compatible with the platform version use
 
 | Platform Version| Add-on Version|
 |:----------------|:--------------|
+| 7.1.0           | 1.2.0         |
 | 7.0.5           | 1.1.0         |
 | 6.10.8          | 1.0.2         |
 
 
 Add custom application component to your project (change the version part if needed):
 ```
-com.haulmont.addon.tour:tour-global:1.1.0   
+com.haulmont.addon.tour:tour-global:1.2.0   
 ```
 
 ### Description
