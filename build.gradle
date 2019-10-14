@@ -13,6 +13,7 @@ buildscript {
     }
     dependencies {
         classpath "com.haulmont.gradle:cuba-plugin:$cubaVersion"
+        classpath "com.haulmont.gradle:addon-gradle-plugin:1.1.2"
     }
 }
 
@@ -26,6 +27,7 @@ def webToolkitModule = project(":${modulePrefix}-web-toolkit")
 def servletApi = 'javax.servlet:javax.servlet-api:3.1.0'
 
 apply(plugin: 'cuba')
+apply(plugin: 'addon-gradle-plugin')
 
 cuba {
     artifact {
@@ -48,26 +50,8 @@ configure([globalModule, coreModule, webModule, webToolkitModule]) {
     apply(plugin: 'java')
     apply(plugin: 'maven')
     apply(plugin: 'cuba')
-    apply(plugin: 'checkstyle')
+    apply(plugin: 'addon-gradle-plugin')
 
-    String checkstyleConfigDir = "${rootProject.projectDir}/config/checkstyle"
-    checkstyle {
-        toolVersion = "6.2"
-        configFile = new File("${checkstyleConfigDir}/checkstyle.xml".toString())
-        configProperties = [
-                'checkstyleConfigDir': checkstyleConfigDir
-        ]
-        reportsDir = new File("${buildDir}/checkstyle".toString())
-        ignoreFailures = false
-    }
-
-    checkstyleMain << {
-        def checkstyleDir = "${project.buildDir}/checkstyle".toString()
-        ant.xslt('in': "$checkstyleDir/main.xml",
-                out: "$checkstyleDir/$project.name-checkstyle.html",
-                style: "$checkstyleConfigDir/checkstyle.xsl")
-    }
-    
     dependencies {
         testCompile('junit:junit:4.12')
         testCompile('org.jmockit:jmockit:1.39')

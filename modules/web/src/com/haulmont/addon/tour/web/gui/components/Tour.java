@@ -40,7 +40,7 @@ public class Tour extends AbstractExtension<com.haulmont.addon.tour.web.toolkit.
          *
          * @param target the target component
          */
-        public CubaTour(AbstractClientConnector target) {
+        CubaTour(AbstractClientConnector target) {
             extendInternal(target);
         }
 
