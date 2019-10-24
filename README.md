@@ -1,5 +1,7 @@
-### Preface
-This add-on is designed to create **product tour** for screens in the projects based on 
+# Interactive Tour
+
+## Overview
+This add-on is designed to create **product tour** for screens in the projects based on
 [CUBA platform](https://www.cuba-platform.com).
 
 ### Main features
@@ -10,32 +12,61 @@ The following components are used to create and run tours:
 - **TourStartAction** (Standard action to start a tour)
 - **TourParser** (Parser of Tour objects)
 
-### Usage
-Select a version of the add-on which is compatible with the platform version used in your project:
+## Installation
 
-| Platform Version| Add-on Version|
-|:----------------|:--------------|
+The add-on can be added to your project in one of the ways described below. Installation from the Marketplace is the simplest way. The last version of the add-on compatible with the used version of the platform will be installed.
+Also, you can install the add-on by coordinates choosing the required version of the add-on from the table.
+
+In case you want to install the add-on by manual editing or by building from sources see the complete add-ons installation guide in [CUBA Platform documentation](https://doc.cuba-platform.com/manual-latest/manual.html#app_components_usage).
+
+### From the Marketplace
+
+1. Open your application in CUBA Studio. Check the latest version of CUBA Studio on the [CUBA Platform site](https://www.cuba-platform.com/download/previous-studio/).
+2. Go to *CUBA -> Marketplace* in the main menu.
+
+ ![marketplace](screenshots/marketplace.png)
+
+3. Find the *Interactive Tour* add-on there.
+
+ ![addons](screenshots/addons.png)
+
+4. Click *Install* and apply the changes.
+The add-on corresponding to the used platform version will be installed.
+
+### By Coordinates
+
+1. Open your application in CUBA Studio. Check the latest version of CUBA Studio on the [CUBA Platform site](https://www.cuba-platform.com/download/previous-studio/).
+2. Go to *CUBA -> Marketplace* in the main menu.
+3. Click the icon in the upper-right corner.
+
+ ![by-coordinates](screenshots/by-coordinates.png)
+
+4. Paste the add-on coordinates in the corresponding field as follows:
+
+ `com.haulmont.addon.tour:tour-global:<add-on version>`
+
+ where `<add-on version>` is compatible with the used version of the CUBA platform.
+
+ | Platform Version | Add-on Version |
+|------------------|----------------|
 | 7.1.0           | 1.2.0         |
 | 7.0.5           | 1.1.0         |
 | 6.10.8          | 1.0.2         |
 
+5. Click *Install* and apply the changes. The add-on will be installed to your project.
 
-Add custom application component to your project (change the version part if needed):
-```
-com.haulmont.addon.tour:tour-global:1.2.0   
-```
+## Usage
 
-### Description
 This add-on enables creating a product tour on your application's screens. Each step of the tour can be bound to any UI component, thus helping you to show and describe UI components.
 
-The tour itself consists of steps, each having its own title, value (text), binding to a component, and some other configuration attributes. In order to interact between steps, the special `StepButton` buttons are used. These buttons may have either predefined actions from `TourActionType` and `StepActionType` or their own actions. The `Tour` interface is used for tours, while `Step` is used for steps. 
-
+The tour itself consists of steps, each having its own title, value (text), binding to a component, and some other configuration attributes. In order to interact between steps, the special `StepButton` buttons are used. These buttons may have either predefined actions from `TourActionType` and `StepActionType` or their own actions. The `Tour` interface is used for tours, while `Step` is used for steps.
 
 A tour can also be created with the help of the `parseTour()` method of `TourParser`, which receives a JSON, messagesPack, and window to extend.
 
 To start a tour, call the `TourStartAction`. The `setSettingsEnabled()` method allows you to define whether the tour should start each time on the screen opening or only once at the first time.
 
-#### Step-by-step guide
+### Step-by-Step Guide
+
 As a hands-on example, let's create a small demo app containing two screens with tours.
 
 In this app, we will:
@@ -72,7 +103,7 @@ import java.math.BigDecimal;
 @Table(name = "DEMO_PRODUCT")
 @Entity(name = "demo_Product")
 public class Product extends StandardEntity {
-    
+
     @Column(name = "NAME")
     protected String name;
 
@@ -110,7 +141,7 @@ To create the button, add the component below to the `buttonsPanel` component in
 ```
 
 On the `ProductBrowse` screen initialization, we will parse the tour from the JSON file which is located in the same directory with screens.
-This JSON file describes the list of steps for the tour. Each step is provided with several parameters and an array of buttons. 
+This JSON file describes the list of steps for the tour. Each step is provided with several parameters and an array of buttons.
 For each button we describe its attributes and the action performed on the button's click.
 
 `productBrowseTour.json`:
@@ -240,7 +271,7 @@ For each button we describe its attributes and the action performed on the butto
 ```
 
 To start the tour let's create a method `startTour()`. We'll disable the setting of starting a tour only one on the first screen opening.
-This method will be invoked on the `tourButton` click. Additionally,let's call this method at the screen initialization. 
+This method will be invoked on the `tourButton` click. Additionally,let's call this method at the screen initialization.
 
 `ProductBrowse.java` should look like this:
 ```Java
@@ -296,8 +327,8 @@ public class ProductBrowse extends StandardLookup<Product> {
 }
 ```
 
-At the `ProductEdit` screen in the `onInit` method we will call the `createTour()` method where we create a tour instance, 
-add the steps, their parameters, and buttons. Also, in the `onInit` method we create an action that will start a tour 
+At the `ProductEdit` screen in the `onInit` method we will call the `createTour()` method where we create a tour instance,
+add the steps, their parameters, and buttons. Also, in the `onInit` method we create an action that will start a tour
 without disabling additional settings.
 
 `ProductEdit.java` should look like this:
