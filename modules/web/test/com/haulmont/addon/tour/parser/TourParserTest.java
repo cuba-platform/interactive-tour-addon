@@ -1,6 +1,10 @@
 package com.haulmont.addon.tour.parser;
 
-import com.haulmont.addon.tour.web.gui.components.*;
+import com.haulmont.addon.tour.web.gui.components.ContentMode;
+import com.haulmont.addon.tour.web.gui.components.Step;
+import com.haulmont.addon.tour.web.gui.components.StepAnchor;
+import com.haulmont.addon.tour.web.gui.components.StepButton;
+import com.haulmont.addon.tour.web.gui.components.Tour;
 import com.haulmont.addon.tour.web.gui.utils.TourParser;
 import com.haulmont.cuba.client.testsupport.CubaClientTestCase;
 import com.haulmont.cuba.core.global.Messages;
@@ -13,18 +17,15 @@ import com.haulmont.cuba.gui.components.sys.FrameImplementation;
 import com.haulmont.cuba.web.gui.WebUiComponents;
 import com.haulmont.cuba.web.gui.components.WebTabWindow;
 import com.haulmont.cuba.web.gui.components.WebTextField;
-import mockit.integration.junit4.JMockit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Objects;
 
-@RunWith(JMockit.class)
 public class TourParserTest extends CubaClientTestCase {
 
     protected Resources resources;

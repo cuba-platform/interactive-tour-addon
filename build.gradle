@@ -65,8 +65,10 @@ configure([globalModule, coreModule, webModule, webToolkitModule]) {
     apply(plugin: 'addon-gradle-plugin')
 
     dependencies {
-        testCompile('junit:junit:4.12')
-        testCompile('org.jmockit:jmockit:1.39')
+        testCompile('org.jmockit:jmockit:1.48')
+        testCompile('org.junit.jupiter:junit-jupiter-api:5.5.2')
+        testCompile('org.junit.jupiter:junit-jupiter-engine:5.5.2')
+        testCompile('org.junit.vintage:junit-vintage-engine:5.5.2')
         testCompile('org.spockframework:spock-core:1.3-groovy-2.5') {
             exclude(group: 'org.codehaus.groovy', module: 'groovy-all')
         }
@@ -79,6 +81,25 @@ configure([globalModule, coreModule, webModule, webToolkitModule]) {
 
     artifacts {
         archives sourceJar
+    }
+
+    test {
+        useJUnitPlatform()
+        jvmArgumentProviders.add(new JmockitAgent(classpath))
+    }
+}
+
+class JmockitAgent implements CommandLineArgumentProvider {
+
+    FileCollection classpath
+
+    JmockitAgent(FileCollection classpath) {
+        this.classpath = classpath
+    }
+
+    Iterable<String> asArguments() {
+        def path = classpath.find { it.name.contains("jmockit") }.absolutePath
+        ["-javaagent:${path}"]
     }
 }
 
