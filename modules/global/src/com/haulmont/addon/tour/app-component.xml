@@ -20,7 +20,7 @@
         <artifact name="tour-web" classifier="web" ext="zip" configuration="webcontent"/>
         <artifact name="tour-web-toolkit" appJar="true" classifier="client" ext="jar"
                   skipIfExists="web-toolkit"/>
-        <artifact name="tour-web" ext="jar" configuration="themes"/>
+        <artifact name="tour-web" ext="jar" configuration="themes" classifier="themes"/>
 
         <property name="cuba.springContextConfig" value="+com/haulmont/addon/tour/web-spring.xml"/>
         <property name="cuba.dispatcherSpringContextConfig" value="+com/haulmont/addon/tour/web-dispatcher-spring.xml"/>
