@@ -1,6 +1,6 @@
 
 buildscript {
-    ext.cubaVersion = rootProject.hasProperty('cubaVersion') ? rootProject['cubaVersion'] : '7.2-SNAPSHOT'
+    ext.cubaVersion = rootProject.hasProperty('cubaVersion') ? rootProject['cubaVersion'] : '7.2.0'
     repositories {
         mavenLocal()
 
@@ -217,6 +217,7 @@ configure(webModule) {
     task deployThemes(type: CubaDeployThemeTask, dependsOn: buildScssThemes)
 
     assemble.dependsOn buildScssThemes
+    webArchive.dependsOn buildScssThemes
 
     task themesJar(type: Jar) {
         from file('themes')
