@@ -49,9 +49,10 @@ The add-on corresponding to the used platform version will be installed.
 
  | Platform Version | Add-on Version |
 |------------------|----------------|
-| 7.1.0           | 1.2.0         |
-| 7.0.5           | 1.1.0         |
-| 6.10.8          | 1.0.2         |
+| 7.2.x           | 1.3.0         |
+| 7.1.x           | 1.2.0         |
+| 7.0.x           | 1.1.0         |
+| 6.10.x          | 1.0.2         |
 
 5. Click *Install* and apply the changes. The add-on will be installed to your project.
 
